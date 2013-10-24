@@ -57,7 +57,7 @@ public class CordovaChromeClient extends AmazonWebChromeClient {
     private String TAG = "CordovaLog";
 
     /* Using a conservative database quota (used primarily for the stock Android back-end) */
-    private static final long DB_QUOTA = 5 * 1024 * 1024;
+    private static final long MAX_QUOTA = 100 * 1024 * 1024;
     
     protected CordovaInterface cordova;
     protected CordovaWebView appView;
@@ -285,28 +285,13 @@ public class CordovaChromeClient extends AmazonWebChromeClient {
 
     /**
      * Handle database quota exceeded notification.
-     *
-     * @param url
-     * @param databaseIdentifier
-     * @param currentQuota
-     * @param estimatedSize
-     * @param totalUsedQuota
-     * @param quotaUpdater
      */
     @Override
     public void onExceededDatabaseQuota(String url, String databaseIdentifier, long currentQuota, long estimatedSize,
             long totalUsedQuota, AmazonWebStorage.QuotaUpdater quotaUpdater)
     {
-        LOG.d(TAG, "Exceeded database quota - adjusting to " + DB_QUOTA + " bytes");
-
-        // This function is only called on the stock Android back-end due to the default
-        // quota initializing to 0 bytes. When on Chromium-compatible devices or platforms,
-        // the quota is essentially "unlimited" given the sufficient disk space.
-        if (currentQuota < DB_QUOTA) {
-            quotaUpdater.updateQuota(DB_QUOTA);
-            
-        }
-        
+        LOG.d(TAG, "onExceededDatabaseQuota estimatedSize: %d  currentQuota: %d  totalUsedQuota: %d", estimatedSize, currentQuota, totalUsedQuota);
+        quotaUpdater.updateQuota(MAX_QUOTA);
     }
 
     // console.log in api level 7: http://developer.android.com/guide/developing/debug-tasks.html
