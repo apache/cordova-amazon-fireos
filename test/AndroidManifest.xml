@@ -256,7 +256,8 @@
                 <category android:name="android.intent.category.SAMPLE_CODE" />
             </intent-filter>
         </activity>
-                <!-- This is required for the Tests to work with AmazonWebView -->
+
+        <!-- This is required for the Tests to work with AmazonWebView -->
         <amazon:enable-feature 
             android:name="com.amazon.webview" 
             amazon:required="false" />
@@ -300,4 +301,6 @@
             android:permission="org.chromium.content_shell.permission.SANDBOX"
             android:process=":sandboxed_process5" />
         </application>
+    </application>
+
 </manifest> 
