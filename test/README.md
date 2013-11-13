@@ -30,7 +30,6 @@ Before running the tests, they need to be set up.
 
 To run from command line:
 
-0. Install the Cordova Device Plugin using plugman
 0. Build by entering `ant debug install`
 0. Run tests by clicking on "CordovaTest" icon on device
 

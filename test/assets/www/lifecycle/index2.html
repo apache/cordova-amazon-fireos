@@ -40,6 +40,7 @@ $
 
     function onDeviceReady() {
         // Register the event listener
+<<<<<<< HEAD
         document.getElementById("platform").innerHTML = device.platform;
         document.getElementById("version").innerHTML = device.version;
         document.getElementById("uuid").innerHTML = device.uuid;
@@ -47,6 +48,10 @@ $
         document.getElementById("width").innerHTML = screen.width;
         document.getElementById("height").innerHTML = screen.height;
         document.getElementById("colorDepth").innerHTML = screen.colorDepth;
+=======
+        document.getElementById("deviceready").innerHTML = "fired";
+        document.getElementById("cordova").innerHTML = cordova.version;
+>>>>>>> 8e753a6... CB-5346: remove dependency on device plugin
 
         document.addEventListener("pause", onPause, false);
         document.addEventListener("resume", onResume, false);
