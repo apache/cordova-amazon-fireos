@@ -60,6 +60,13 @@ import com.amazon.android.webkit.AmazonWebKitFactory;
 import android.widget.FrameLayout;
 
 public class CordovaWebView extends AmazonWebView {
+/*
+ * This class is our web view.
+ *
+ * @see <a href="http://developer.android.com/guide/webapps/webview.html">WebView guide</a>
+ * @see <a href="http://developer.android.com/reference/android/webkit/WebView.html">WebView</a>
+ */
+
 
     public static final String TAG = "CordovaWebView";
     public static final String CORDOVA_VERSION = "3.3.0-dev";
@@ -267,7 +274,9 @@ public class CordovaWebView extends AmazonWebView {
         this.setup();
     }
 
-
+    /**
+     * set the WebViewClient, but provide special case handling for IceCreamSandwich.
+     */
     private void initWebViewClient(CordovaInterface cordova) {
         if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB ||
                 android.os.Build.VERSION.SDK_INT > android.os.Build.VERSION_CODES.JELLY_BEAN_MR1)
