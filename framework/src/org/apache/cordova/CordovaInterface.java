@@ -53,7 +53,7 @@ public interface CordovaInterface {
     /**
      * Get the Android activity.
      *
-     * @return
+     * @return the Activity
      */
     public abstract Activity getActivity();
     
