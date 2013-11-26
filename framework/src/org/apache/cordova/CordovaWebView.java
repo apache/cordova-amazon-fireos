@@ -425,10 +425,10 @@ public class CordovaWebView extends AmazonWebView {
     }
 
 	/**
-	 * Override this method to decide wether or not you need to request the
+	 * Override this method to decide whether or not you need to request the
 	 * focus when your application start
 	 * 
-	 * @return
+	 * @return true unless this method is overriden to return a different value
 	 */
     protected boolean shouldRequestFocusOnInit() {
 		return true;
@@ -746,7 +746,7 @@ public class CordovaWebView extends AmazonWebView {
      *
      * @param name
      * @param defaultValue
-     * @return
+     * @return the String value for the named property
      */
     public String getProperty(String name, String defaultValue) {
         Bundle bundle = this.cordova.getActivity().getIntent().getExtras();
@@ -1056,7 +1056,7 @@ public class CordovaWebView extends AmazonWebView {
      * if the video overlay is showing then we need to know 
      * as it effects back button handling
      * 
-     * @return
+     * @return true if custom view is showing
      */
     public boolean isCustomViewShowing() {
         return mCustomView != null;
