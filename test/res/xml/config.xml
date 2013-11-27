@@ -6,7 +6,11 @@
     </description>
     <author email="dev@cordova.apache.org" href="http://cordova.io">
     </author>
-    <access origin="*.apache.org" />
+    
+    <access origin="*.apache.org"/>
+    <access origin="http://www.flickr.com/explore" />
+
+    <!-- <content src="http://mysite.com/myapp.html" /> for external pages -->
     <content src="index.html" />
     <log level="DEBUG" />
     <preference name="useBrowserHistory" value="true" />
