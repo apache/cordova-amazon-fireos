@@ -35,7 +35,6 @@ public class HtmlNotFoundTest extends ActivityInstrumentationTestCase2<htmlnotfo
   private FrameLayout containerView;
   private LinearLayout innerContainer;
   private CordovaWebView testView;
-  private AmazonWebViewOnUiThread mUiThread;
 
   public HtmlNotFoundTest() {
     super("org.apache.cordova.test",htmlnotfound.class);
@@ -48,7 +47,6 @@ public class HtmlNotFoundTest extends ActivityInstrumentationTestCase2<htmlnotfo
     containerView = (FrameLayout) testActivity.findViewById(android.R.id.content);
     innerContainer = (LinearLayout) containerView.getChildAt(0);
     testView = (CordovaWebView) innerContainer.getChildAt(0);
-    mUiThread = new AmazonWebViewOnUiThread(this, testView);
   }
 
   public void testPreconditions(){
@@ -56,13 +54,19 @@ public class HtmlNotFoundTest extends ActivityInstrumentationTestCase2<htmlnotfo
     assertNotNull(testView);
   }
 
-  public void testUrl()
+  public void testUrl() throws Throwable
   {
       sleep();
-      String good_url = "file:///android_asset/www/htmlnotfound/error.html";
-      String url = mUiThread.getUrl();
-      assertNotNull(url);
-      assertFalse(url.equals(good_url));
+      runTestOnUiThread(new Runnable() {
+          public void run()
+          {
+              String good_url = "file:///android_asset/www/htmlnotfound/error.html";
+              String url = testView.getUrl();
+              assertNotNull(url);
+              assertFalse(url.equals(good_url));
+          }
+      });
+
   }
 
   private void sleep() {

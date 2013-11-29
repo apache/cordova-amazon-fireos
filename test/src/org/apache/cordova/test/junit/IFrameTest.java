@@ -40,7 +40,6 @@ public class IFrameTest extends ActivityInstrumentationTestCase2 {
     private FrameLayout containerView;
     private LinearLayout innerContainer;
     private CordovaWebView testView;
-    private AmazonWebViewOnUiThread mUiThread;
     private TouchUtils touch;
     private Purity touchTool;
     
@@ -56,32 +55,67 @@ public class IFrameTest extends ActivityInstrumentationTestCase2 {
       containerView = (FrameLayout) testActivity.findViewById(android.R.id.content);
       innerContainer = (LinearLayout) containerView.getChildAt(0);
       testView = (CordovaWebView) innerContainer.getChildAt(0);
-      mUiThread = new AmazonWebViewOnUiThread(this, testView);
       touch = new TouchUtils();
       touchTool = new Purity(testActivity, getInstrumentation());
     }
   
   
-    public void testIframeDest()
+    public void testIframeDest() throws Throwable
     {
-        testView.sendJavascript("loadUrl('http://maps.google.com/maps?output=embed');");
+        runTestOnUiThread(new Runnable() {
+            public void run()
+            {
+                testView.sendJavascript("loadUrl('http://maps.google.com/maps?output=embed');");
+            }
+        });
         sleep(3000);
-        testView.sendJavascript("loadUrl('index2.html')");
+        runTestOnUiThread(new Runnable() {
+            public void run()
+            {
+                testView.sendJavascript("loadUrl('index2.html')");
+            }
+        });
         sleep(1000);
-        String url = mUiThread.getUrl();
-        assertTrue(url.endsWith("index.html"));
+        runTestOnUiThread(new Runnable() {
+            public void run()
+            {
+                String url = testView.getUrl();
+                assertTrue(url.endsWith("index.html"));
+            }
+        });
     }
     
-    public void testIframeHistory()
+    public void testIframeHistory() throws Throwable
     {
-        testView.sendJavascript("loadUrl('http://maps.google.com/maps?output=embed');");
+        runTestOnUiThread(new Runnable() {
+            public void run()
+            {
+                testView.sendJavascript("loadUrl('http://maps.google.com/maps?output=embed');");
+            }
+        });
         sleep(3000);
-        testView.sendJavascript("loadUrl('index2.html')");
+        runTestOnUiThread(new Runnable() {
+            public void run()
+            {
+                testView.sendJavascript("loadUrl('index2.html')");
+            }
+        });
         sleep(1000);
-        String url = mUiThread.getUrl();
-        mUiThread.backHistory();
+        runTestOnUiThread(new Runnable() {
+            public void run()
+            {
+                String url = testView.getUrl();
+                testView.backHistory();
+            }
+        });
         sleep(1000);
-        assertTrue(url.endsWith("index.html"));
+        runTestOnUiThread(new Runnable() {
+            public void run()
+            {
+                String url = testView.getUrl();
+                assertTrue(url.endsWith("index.html"));
+            }
+        });
     }
     
     private void sleep(int timeout) {
