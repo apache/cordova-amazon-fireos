@@ -89,5 +89,5 @@ module.exports.check_android = function() {
 
 // Returns a promise.
 module.exports.run = function() {
-    return Q.all([this.check_ant(), this.check_java, this.check_android()]);
+    return Q.all([this.check_ant(), this.check_java(), this.check_android()]);
 }
