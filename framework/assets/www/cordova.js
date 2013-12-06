@@ -1,5 +1,5 @@
-// Platform: android
-// 3.2.0-dev-5ad41a7
+// Platform: amazon-fireos
+// 3.4.0-dev-17d3305
 /*
  Licensed to the Apache Software Foundation (ASF) under one
  or more contributor license agreements.  See the NOTICE file
@@ -19,7 +19,7 @@
  under the License.
 */
 ;(function() {
-var CORDOVA_JS_BUILD_LABEL = '3.2.0-dev-5ad41a7';
+var CORDOVA_JS_BUILD_LABEL = '3.4.0-dev-17d3305';
 // file: lib/scripts/require.js
 
 /*jshint -W079 */
@@ -34,7 +34,7 @@ var require,
         requireStack = [],
     // Map of module ID -> index into requireStack of modules currently being built.
         inProgressModules = {},
-        SEPERATOR = ".";
+        SEPARATOR = ".";
 
 
 
@@ -44,7 +44,7 @@ var require,
                 var resultantId = id;
                 //Its a relative path, so lop off the last portion and add the id (minus "./")
                 if (id.charAt(0) === ".") {
-                    resultantId = module.id.slice(0, module.id.lastIndexOf(SEPERATOR)) + SEPERATOR + id.slice(2);
+                    resultantId = module.id.slice(0, module.id.lastIndexOf(SEPARATOR)) + SEPARATOR + id.slice(2);
                 }
                 return require(resultantId);
             };
@@ -316,7 +316,7 @@ module.exports = cordova;
 
 });
 
-// file: lib/android/android/nativeapiprovider.js
+// file: lib/amazon-fireos/android/nativeapiprovider.js
 define("cordova/android/nativeapiprovider", function(require, exports, module) {
 
 /**
@@ -339,7 +339,7 @@ module.exports = {
 
 });
 
-// file: lib/android/android/promptbasednativeapi.js
+// file: lib/amazon-fireos/android/promptbasednativeapi.js
 define("cordova/android/promptbasednativeapi", function(require, exports, module) {
 
 /**
@@ -552,7 +552,7 @@ function include(parent, objects, clobber, merge) {
                 include(result, obj.children, clobber, merge);
             }
         } catch(e) {
-            utils.alert('Exception building cordova JS globals: ' + e + ' for key "' + key + '"');
+            utils.alert('Exception building Cordova JS globals: ' + e + ' for key "' + key + '"');
         }
     });
 }
@@ -837,7 +837,7 @@ module.exports = channel;
 
 });
 
-// file: lib/android/exec.js
+// file: lib/amazon-fireos/exec.js
 define("cordova/exec", function(require, exports, module) {
 
 /**
@@ -1074,6 +1074,36 @@ module.exports = androidExec;
 
 });
 
+// file: lib/common/exec/proxy.js
+define("cordova/exec/proxy", function(require, exports, module) {
+
+
+// internal map of proxy function
+var CommandProxyMap = {};
+
+module.exports = {
+
+    // example: cordova.commandProxy.add("Accelerometer",{getCurrentAcceleration: function(successCallback, errorCallback, options) {...},...);
+    add:function(id,proxyObj) {
+        console.log("adding proxy for " + id);
+        CommandProxyMap[id] = proxyObj;
+        return proxyObj;
+    },
+
+    // cordova.commandProxy.remove("Accelerometer");
+    remove:function(id) {
+        var proxy = CommandProxyMap[id];
+        delete CommandProxyMap[id];
+        CommandProxyMap[id] = null;
+        return proxy;
+    },
+
+    get:function(service,action) {
+        return ( CommandProxyMap[service] ? CommandProxyMap[service][action] : null );
+    }
+};
+});
+
 // file: lib/common/init.js
 define("cordova/init", function(require, exports, module) {
 
@@ -1289,11 +1319,11 @@ exports.reset();
 
 });
 
-// file: lib/android/platform.js
+// file: lib/amazon-fireos/platform.js
 define("cordova/platform", function(require, exports, module) {
 
 module.exports = {
-    id: 'android',
+    id: 'amazon-fireos',
     bootstrap: function() {
         var channel = require('cordova/channel'),
             cordova = require('cordova'),
@@ -1330,7 +1360,7 @@ module.exports = {
 
 });
 
-// file: lib/android/plugin/android/app.js
+// file: lib/amazon-fireos/plugin/android/app.js
 define("cordova/plugin/android/app", function(require, exports, module) {
 
 var exec = require('cordova/exec');
