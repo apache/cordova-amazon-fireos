@@ -72,7 +72,7 @@ public class CordovaWebView extends AmazonWebView {
 
 
     public static final String TAG = "CordovaWebView";
-    public static final String CORDOVA_VERSION = "3.3.0-rc1";
+    public static final String CORDOVA_VERSION = "3.3.0";
 
     private ArrayList<Integer> keyDownCodes = new ArrayList<Integer>();
     private ArrayList<Integer> keyUpCodes = new ArrayList<Integer>();
