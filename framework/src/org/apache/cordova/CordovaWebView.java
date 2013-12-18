@@ -367,29 +367,7 @@ public class CordovaWebView extends AmazonWebView {
             // enable the local storage database normally with the Chromium back-end
             settings.setDatabaseEnabled(true);
         }
-        
-        
-        //Determine whether we're in debug or release mode, and turn on Debugging!
-        try {
-            final String packageName = this.cordova.getActivity().getPackageName();
-            final PackageManager pm = this.cordova.getActivity().getPackageManager();
-            ApplicationInfo appInfo;
-            
-            appInfo = pm.getApplicationInfo(packageName, PackageManager.GET_META_DATA);
-            
-            if((appInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0 &&  
-                android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT)
-            {
-                setWebContentsDebuggingEnabled(true);
-            }
-        } catch (IllegalArgumentException e) {
-            Log.d(TAG, "You have one job! To turn on Remote Web Debugging! YOU HAVE FAILED! ");
-            e.printStackTrace();
-        } catch (NameNotFoundException e) {
-            Log.d(TAG, "This should never happen: Your application's package can't be found.");
-            e.printStackTrace();
-        }  
-
+                
         // Enable DOM storage
         settings.setDomStorageEnabled(true);
 
