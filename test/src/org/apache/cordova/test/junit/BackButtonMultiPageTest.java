@@ -144,15 +144,7 @@ public class BackButtonMultiPageTest extends
           }
       });
       sleep();
-      url = testView.getUrl();
-      assertTrue(url.endsWith("index.html"));
-      assertTrue(didGoBack);
-    }
-
-	public void testPreconditions() {
-		assertNotNull(innerContainer);
-		assertNotNull(testView);
-	}
+      
       runTestOnUiThread(new Runnable() {
           public void run()
           {
@@ -161,7 +153,7 @@ public class BackButtonMultiPageTest extends
               testView.backHistory();
           }
       });
-  }
+    }
 
   public void testViaBackButtonOnView() throws Throwable {
       runTestOnUiThread(new Runnable() {
