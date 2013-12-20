@@ -43,11 +43,26 @@ public class CordovaWebViewTestActivity extends Activity implements CordovaInter
     public CordovaWebView cordovaWebView;
 
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
+    private static boolean sFactoryInit = false;
+    private AmazonWebKitFactory factory = null;
     
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
+//        AWV Factory should be initialized before setting the layout  
+        if (!sFactoryInit) {
+           factory = AmazonWebKitFactories.getDefaultFactory();
+           if (factory.isRenderProcess(this)) {
+               return; // Do nothing if this is on render process
+           }
+           factory.initialize(this);
+           
+           sFactoryInit = true;
+       } else {
+           factory = AmazonWebKitFactories.getDefaultFactory();
+       }
 
         setContentView(R.layout.main);
 
