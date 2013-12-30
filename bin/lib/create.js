@@ -180,6 +180,12 @@ exports.createProject = function(project_path, package_name, project_name, proje
     });
 }
 
+// Attribute removed in Cordova 4.4 (CB-5447).
+function removeDebuggableFromManifest(projectPath) {
+    var manifestPath   = path.join(projectPath, 'AndroidManifest.xml');
+    shell.sed('-i', /\s*android:debuggable="true"/, '', manifestPath);
+}
+
 // Returns a promise.
 exports.updateProject = function(projectPath) {
     var version = fs.readFileSync(path.join(ROOT, 'VERSION'), 'utf-8').trim();
@@ -191,7 +197,11 @@ exports.updateProject = function(projectPath) {
     }).then(function() {
         copyJsAndJar(projectPath, version);
         copyScripts(projectPath);
-        console.log('Android project is now at version ' + version);
+        removeDebuggableFromManifest(projectPath);
+        return runAndroidUpdate(projectPath, target_api, false)
+        .then(function() {
+            console.log('Android project is now at version ' + version);
+        });
     });
 };
 
