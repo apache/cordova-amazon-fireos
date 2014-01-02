@@ -37,3 +37,4 @@ if(args.length < 3 || (args[2] == '--help' || args[2] == '/?' || args[2] == '-h'
     });
 }
 
+create.createProject(args._[0], args._[1], args._[2], args._[3], args['--shared'], args['--cli']).done();
