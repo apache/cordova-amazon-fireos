@@ -20,24 +20,18 @@ package org.apache.cordova;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.cordova.CordovaArgs;
-import org.apache.cordova.CordovaWebView;
-import org.apache.cordova.CallbackContext;
-import org.apache.cordova.CordovaInterface;
-import org.apache.cordova.CordovaPlugin;
-import org.apache.cordova.PluginEntry;
-import org.apache.cordova.PluginResult;
 import org.json.JSONException;
 import org.xmlpull.v1.XmlPullParserException;
 
 import android.content.Intent;
 import android.content.res.XmlResourceParser;
-
 import android.net.Uri;
 import android.os.Debug;
 import android.util.Log;
@@ -52,8 +46,8 @@ public class PluginManager {
     private static String TAG = "PluginManager";
     private static final int SLOW_EXEC_WARNING_THRESHOLD = Debug.isDebuggerConnected() ? 60 : 16;
 
-    // List of service entries
-    private final HashMap<String, PluginEntry> entries = new HashMap<String, PluginEntry>();
+    // List of service entries, sorted by priority
+    private final HashMap<String, PluginEntry> entries = new LinkedHashMap<String, PluginEntry>();
 
     private final CordovaInterface ctx;
     private final CordovaWebView app;
@@ -123,10 +117,13 @@ public class PluginManager {
             }
         }
         XmlResourceParser xml = this.ctx.getActivity().getResources().getXml(id);
+        ArrayList<PluginEntry> tmpEntries = new ArrayList<PluginEntry>();
         int eventType = -1;
         String service = "", pluginClass = "", paramType = "";
+        float priority = 0;
         boolean onload = false;
         boolean insideFeature = false;
+
         while (eventType != XmlResourceParser.END_DOCUMENT) {
             if (eventType == XmlResourceParser.START_TAG) {
                 String strNode = xml.getName();
@@ -152,6 +149,13 @@ public class PluginManager {
                         pluginClass = xml.getAttributeValue(null,"value");
                     else if (paramType.equals("onload"))
                         onload = "true".equals(xml.getAttributeValue(null, "value"));
+                    else if (paramType.equals("priority")) {
+                        try {
+                            priority = Float.parseFloat(xml.getAttributeValue(null,"value"));
+                        } catch (NumberFormatException nfe) {
+                            priority = 0;
+                        }
+                    }
                 }
             }
             else if (eventType == XmlResourceParser.END_TAG)
@@ -159,12 +163,13 @@ public class PluginManager {
                 String strNode = xml.getName();
                 if (strNode.equals("feature") || strNode.equals("plugin"))
                 {
-                    PluginEntry entry = new PluginEntry(service, pluginClass, onload);
-                    this.addService(entry);
+                    PluginEntry entry = new PluginEntry(service, pluginClass, onload, priority);
+                    tmpEntries.add(entry);
 
                     //Empty the strings to prevent plugin loading bugs
                     service = "";
                     pluginClass = "";
+                    priority = 0;
                     insideFeature = false;
                 }
             }
@@ -176,6 +181,9 @@ public class PluginManager {
                 e.printStackTrace();
             }
         }
+
+        // sort and add list of items to final entries collection
+        this.addServices(tmpEntries);
     }
 
     /**
@@ -289,19 +297,56 @@ public class PluginManager {
      * @param className         The plugin class name
      */
     public void addService(String service, String className) {
-        PluginEntry entry = new PluginEntry(service, className, false);
+        PluginEntry entry = new PluginEntry(service, className, false, 0);
         this.addService(entry);
     }
 
-    /**
-     * Add a plugin class that implements a service to the service entry table.
-     * This does not create the plugin object instance.
-     *
-     * @param entry             The plugin entry
-     */
-    public void addService(PluginEntry entry) {
-        this.entries.put(entry.service, entry);
-    }
+	/**
+	 * Add a plugin class that implements a service to the service entry table.
+	 * This does not create the plugin object instance.
+	 *
+	 * @param entry
+	 *            The plugin entry
+	 */
+	public void addService(PluginEntry entry) {
+		/*
+		 * When adding a new plugin we must reconstruct and sort the list of
+		 * PluginEntries (which reside in a LinkedHashMap) to maintain its
+		 * order. Although this may not be entirely desirable, it prevents us
+		 * from having to maintain a separate sorted data structure while still
+		 * keeping the benefits of storing the objects in a HashMap.
+		 * Furthermore, this function is currently only called once during the
+		 * initialization; and so by default is a total of only two overall
+		 * sorts (one for initial config.xml parse, and another for the
+		 * PluginManager service).
+		 *
+		 * Note: this method is not thread-safe, and is planned to be improved
+		 * in future commits (along with some other thread-unsafe areas)
+		 */
+
+		// create list from existing set of plugin entries, then add new item to list
+		List<PluginEntry> pluginEntries = new ArrayList<PluginEntry>(entries.values());
+		pluginEntries.add(entry);
+
+		// clear list and recreate final set entries in priority order
+		entries.clear();
+		this.addServices(pluginEntries);
+	}
+
+	/**
+	 * Takes a list of plugin entries which are first sorted by priority and
+	 * then individually added to the final ordered hashmap. This does not
+	 * create the plugin object instance.
+	 *
+	 * @param services
+	 *            the list of services to sort and add to final entry hash
+	 */
+	private void addServices(List<PluginEntry> services) {
+		Collections.sort(services);
+		for (PluginEntry pluginEntry : services) {
+			this.entries.put(pluginEntry.service, pluginEntry);
+		}
+	}
 
     /**
      * Called when the system is about to start resuming a previous activity.

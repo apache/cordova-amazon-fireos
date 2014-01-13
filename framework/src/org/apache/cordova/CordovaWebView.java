@@ -335,7 +335,8 @@ public class CordovaWebView extends AmazonWebView {
         
         // Jellybean rightfully tried to lock this down. Too bad they didn't give us a whitelist
         // while we do this
-        if (android.os.Build.VERSION.SDK_INT > android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1)
+        if (android.os.Build.VERSION.SDK_INT > android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1
+            || (getWebViewBackend(this.cordova.getFactory()) == WebViewBackend.CHROMIUM))
             Level16Apis.enableUniversalAccess(settings);
         
         if (getWebViewBackend(this.cordova.getFactory()) == WebViewBackend.ANDROID) {
@@ -537,49 +538,14 @@ public class CordovaWebView extends AmazonWebView {
 
         this.url = url;
         this.pluginManager.init();
-
-
-        // Create a timeout timer for loadUrl
-        final CordovaWebView me = this;
-        final int currentLoadUrlTimeout = me.loadUrlTimeout;
-        final int loadUrlTimeoutValue = Integer.parseInt(this.getProperty("LoadUrlTimeoutValue", "20000"));
-
-        // Timeout error method
-        final Runnable loadError = new Runnable() {
-            public void run() {
-                me.stopLoading();
-                LOG.e(TAG, "CordovaWebView: TIMEOUT ERROR!");
-                if (viewClient != null) {
-                    viewClient.onReceivedError(me, -6, "The connection to the server was unsuccessful.", url);
-                }
-            }
-        };
-
-        // Timeout timer method
-        final Runnable timeoutCheck = new Runnable() {
-            public void run() {
-                try {
-                    synchronized (this) {
-                        wait(loadUrlTimeoutValue);
-                    }
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-                // If timeout, then stop loading and handle error
-                if (me.loadUrlTimeout == currentLoadUrlTimeout) {
-                    me.cordova.getActivity().runOnUiThread(loadError);
-                }
-            }
-        };
-
-        // Load url
+        
+        // Got rid of the timers logic to check for errors/non-responding webpages.
+        // Timers were creating threading issues and NPE in some cases where app needed to load more urls or navigate back and forth a lot.
+        // PS. this change exists only on amazon-fireos platform.
         this.cordova.getActivity().runOnUiThread(new Runnable() {
-            public void run() {
-                Thread thread = new Thread(timeoutCheck);
-                thread.start();
-                me.loadUrlNow(url);
-            }
+        	public void run() {
+        	    CordovaWebView.this.loadUrlNow(url);
+        	}
         });
     }
 
@@ -623,7 +589,6 @@ public class CordovaWebView extends AmazonWebView {
         // Load url
         this.loadUrlIntoView(url);
     }
-    
     
     public void onScrollChanged(int l, int t, int oldl, int oldt)
     {
@@ -945,7 +910,8 @@ public class CordovaWebView extends AmazonWebView {
     public void handleDestroy()
     {
         // Send destroy event to JavaScript
-        this.loadUrl("javascript:try{cordova.require('cordova/channel').onDestroy.fire();}catch(e){console.log('exception firing destroy event from native');};");
+        // Since baseUrl is set in loadUrlIntoView, if user hit Back button before loadUrl was called, we'll get an NPE on baseUrl (CB-2458)
+        this.loadUrl("javascript:try{cordova.require('cordova/channel').onDestroy.fire();}catch(e){};");
 
         // Load blank page so that JavaScript onunload is called
         this.loadUrl("about:blank");
