@@ -22,13 +22,11 @@ import org.apache.cordova.CordovaWebView;
 import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.CordovaPlugin;
 
-//import android.content.Context;
-//import com.amazon.android.webkit.AmazonWebView;
 
 /**
  * This class represents a service entry object.
  */
-public class PluginEntry {
+public class PluginEntry implements Comparable<PluginEntry> {
 
     /**
      * The name of the service that this plugin implements
@@ -52,6 +50,15 @@ public class PluginEntry {
      */
     public boolean onload = false;
 
+	/**
+	 * The numerical priority used to determine which plugin takes precendence
+	 * in a conflict scenario with consumable webview callbacks. Note that this
+	 * is a float value, therefore decimal and negative values are supported.
+	 * The priority field represents order, and for this reason a lower value
+	 * will take precedence over a higher value.
+	 */
+	public float priority = 0;
+
     /**
      * Constructor
      *
@@ -59,10 +66,11 @@ public class PluginEntry {
      * @param pluginClass           The plugin class name
      * @param onload                Create plugin object when HTML page is loaded
      */
-    public PluginEntry(String service, String pluginClass, boolean onload) {
+    public PluginEntry(String service, String pluginClass, boolean onload, float priority) {
         this.service = service;
         this.pluginClass = pluginClass;
         this.onload = onload;
+        this.priority = priority;
     }
 
     /**
@@ -76,6 +84,7 @@ public class PluginEntry {
         this.plugin = plugin;
         this.pluginClass = plugin.getClass().getName();
         this.onload = false;
+        this.priority = 0;
     }
 
     /**
@@ -129,4 +138,12 @@ public class PluginEntry {
         }
         return false;
     }
+
+	/**
+	 * Make PluginEntry comparable to allow for sorting by priority.
+	 */
+	@Override
+	public int compareTo(PluginEntry another) {
+		return Float.compare(this.priority, another.priority);
+	}
 }
