@@ -720,6 +720,19 @@ public class CordovaActivity extends Activity implements CordovaInterface {
         this.getIntent().putExtra(name.toLowerCase(), value);
     }
 
+	/*
+	 * Called when a search event is given. Triggers the javascript event to
+	 * handle Search.
+	 * 
+	 * @see android.app.Activity#onSearchRequested()
+	 */
+	@Override
+	public boolean onSearchRequested() {
+		this.sendJavascript("javascript:cordova.fireDocumentEvent('searchbutton');");
+		// Return true to stop unified search from loading
+		return true;
+	}
+    
     @Override
     /**
      * Called when the system is about to start resuming a previous activity.
