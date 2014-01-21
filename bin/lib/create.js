@@ -76,6 +76,11 @@ function copyJsAndJar(projectPath, version) {
     shell.cp('-f', path.join(ROOT, 'framework', 'libs','awv_interface.jar'), path.join(projectPath, 'libs', 'awv_interface.jar'));
 }
 
+function copyAntRules(projectPath) {
+    var srcDir = path.join(ROOT, 'bin', 'templates', 'project');
+    shell.cp('-f', path.join(srcDir, 'custom_rules.xml'), projectPath);
+}
+
 function copyScripts(projectPath) {
     var srcScriptsDir = path.join(ROOT, 'bin', 'templates', 'cordova');
     var destScriptsDir = path.join(projectPath, 'cordova');
@@ -178,6 +183,7 @@ exports.createProject = function(project_path, package_name, project_name, proje
             shell.sed('-i', /__PACKAGE__/, package_name, manifest_path);
             shell.sed('-i', /__APILEVEL__/, target_api.split('-')[1], manifest_path);
             copyScripts(project_path);
+            copyAntRules(project_path);
         });
         // Link it to local android install.
         console.log('Running "android update project"');
@@ -204,6 +210,7 @@ exports.updateProject = function(projectPath) {
     }).then(function() {
         copyJsAndJar(projectPath, version);
         copyScripts(projectPath);
+        copyAntRules(projectPath);
         removeDebuggableFromManifest(projectPath);
         return runAndroidUpdate(projectPath, target_api, false)
         .then(function() {
