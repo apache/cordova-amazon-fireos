@@ -528,20 +528,27 @@ public class CordovaWebView extends AmazonWebView {
         }
     }
 
+    public void loadUrlIntoView(final String url) {
+        loadUrlIntoView(url, true);
+    }
+
     /**
      * Load the url into the webview.
      *
      * @param url
      */
-    public void loadUrlIntoView(final String url) {
+    public void loadUrlIntoView(final String url, boolean recreatePlugins) {
         LOG.d(TAG, ">>> loadUrl(" + url + ")");
+ 
+        if (recreatePlugins) {
+            this.url = url;
+            this.pluginManager.init();
+        }
 
-        this.url = url;
-        this.pluginManager.init();
-        
         // Got rid of the timers logic to check for errors/non-responding webpages.
         // Timers were creating threading issues and NPE in some cases where app needed to load more urls or navigate back and forth a lot.
         // PS. this change exists only on amazon-fireos platform.
+        // Load url
         this.cordova.getActivity().runOnUiThread(new Runnable() {
         	public void run() {
         	    CordovaWebView.this.loadUrlNow(url);
