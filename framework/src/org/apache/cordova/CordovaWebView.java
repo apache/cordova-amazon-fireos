@@ -141,23 +141,9 @@ public class CordovaWebView extends AmazonWebView {
          * Automatically select the back-end depending on the device
          * configuration
          */
-        AUTOMATIC;
-
-        /**
-         * @return the Android string resource ID for the name of this back-end
-         */
-        public int getNameRes() {
-            switch (this) {
-            case ANDROID:
-                return R.string.backend_name_stock_android;
-            case CHROMIUM:
-                return R.string.backend_name_amazon_chromium;
-            case AUTOMATIC:
-            default:
-                return R.string.backend_name_unknown;
-            }
-        }
-    }
+        AUTOMATIC
+    };
+    
     class ActivityResult {
         
         int request;

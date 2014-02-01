@@ -21,8 +21,4 @@
   <string name="app_name">Cordova</string>
   <string name="go">Snap</string>
   
-  <!-- WebView Back-End Names -->
-  <string name="backend_name_stock_android">Android WebView</string>
-  <string name="backend_name_amazon_chromium">Amazon Chromium WebView</string>
-  <string name="backend_name_unknown">Unknown</string>
 </resources>
