@@ -67,7 +67,6 @@ function copyJsAndLibrary(projectPath, shared, projectName) {
             shell.rm('-rf', path.join(nestedCordovaLibPath, 'src'));
         }
     });
-    
     if (!shared) {
         shell.mkdir('-p', nestedCordovaLibPath);
         shell.cp('-f', path.join(ROOT, 'framework', 'AndroidManifest.xml'), nestedCordovaLibPath);
@@ -87,7 +86,11 @@ function copyJsAndLibrary(projectPath, shared, projectName) {
 function runAndroidUpdate(projectPath, target_api, shared) {
     var targetFrameworkDir = getFrameworkDir(projectPath, shared);
     return exec('android update project --subprojects --path "' + projectPath + '" --target ' + target_api + ' --library "' + path.relative(projectPath, targetFrameworkDir) + '"');
+}
 
+function copyAntRules(projectPath) {
+    var srcDir = path.join(ROOT, 'bin', 'templates', 'project');
+    shell.cp('-f', path.join(srcDir, 'custom_rules.xml'), projectPath);
 }
 
 function copyScripts(projectPath) {
@@ -119,7 +122,7 @@ function copyScripts(projectPath) {
  * Returns a promise.
  */
 
-exports.createProject = function(project_path, package_name, project_name, project_template_dir, use_shared_project) {
+exports.createProject = function(project_path, package_name, project_name, project_template_dir, use_shared_project, use_cli_template) {
     var VERSION = fs.readFileSync(path.join(ROOT, 'VERSION'), 'utf-8').trim();
 
     // Set default values for path, package and name
@@ -147,10 +150,6 @@ exports.createProject = function(project_path, package_name, project_name, proje
         return Q.reject('Package name must look like: com.company.Name');
     }
 
-    if (project_name === 'CordovaActivity') {
-        return Q.reject('Project name cannot be CordovaActivity');
-    }
-
     // Check that requirements are met and proper targets are installed
     return check_reqs.run()
     .then(function() {
@@ -167,14 +166,17 @@ exports.createProject = function(project_path, package_name, project_name, proje
             // copy project template
             shell.cp('-r', path.join(project_template_dir, 'assets'), project_path);
             shell.cp('-r', path.join(project_template_dir, 'res'), project_path);
-            shell.cp('-r', path.join(ROOT, 'framework', 'res', 'xml'), path.join(project_path, 'res'));
-
             // Manually create directories that would be empty within the template (since git doesn't track directories).
             shell.mkdir(path.join(project_path, 'libs'));
+            // Add in the proper eclipse project file.
+            if (use_cli_template) {
+                shell.cp(path.join(project_template_dir, 'eclipse-project-CLI'), path.join(project_path, '.project'));
+            } else {
+                shell.cp(path.join(project_template_dir, 'eclipse-project'), path.join(project_path, '.project'));
+            }
 
             // copy cordova.js, cordova.jar and res/xml
             shell.cp('-r', path.join(ROOT, 'framework', 'res', 'xml'), path.join(project_path, 'res'));
-
             copyJsAndLibrary(project_path, use_shared_project, safe_activity_name);
 
             // interpolate the activity name and package
@@ -201,18 +203,8 @@ exports.createProject = function(project_path, package_name, project_name, proje
 
 // Attribute removed in Cordova 4.4 (CB-5447).
 function removeDebuggableFromManifest(projectPath) {
-    var manifestPath = path.join(projectPath, 'AndroidManifest.xml');
+    var manifestPath   = path.join(projectPath, 'AndroidManifest.xml');
     shell.sed('-i', /\s*android:debuggable="true"/, '', manifestPath);
-}
-
-function extractProjectNameFromManifest(projectPath) {
-    var manifestPath = path.join(projectPath, 'AndroidManifest.xml');
-    var manifestData = fs.readFileSync(manifestPath, 'utf8');
-    var m = /<activity[\s\S]*?android:name\s*=\s*"(.*?)"/i.exec(manifestData);
-    if (!m) {
-      throw new Error('Could not find activity name in ' + manifestPath);
-    }
-    return m[1];
 }
 
 // Returns a promise.
@@ -221,10 +213,11 @@ exports.updateProject = function(projectPath) {
     // Check that requirements are met and proper targets are installed
     return check_reqs.run()
     .then(function() {
-        var projectName = extractProjectNameFromManifest(projectPath);
         var target_api = check_reqs.get_target();
         copyJsAndLibrary(projectPath, false, null);
         copyScripts(projectPath);
+        copyAntRules(projectPath);
+        removeDebuggableFromManifest(projectPath);
         return runAndroidUpdate(projectPath, target_api, false)
         .then(function() {
             console.log('Android project is now at version ' + version);
