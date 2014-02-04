@@ -578,6 +578,12 @@ public class CordovaWebView extends AmazonWebView {
         this.loadUrlIntoView(url);
     }
     
+    @Override
+    public void stopLoading() {
+        viewClient.isCurrentlyLoading = false;
+        super.stopLoading();
+    }
+
     public void onScrollChanged(int l, int t, int oldl, int oldt)
     {
         super.onScrollChanged(l, t, oldl, oldt);
