@@ -22,6 +22,7 @@ import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.LOG;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
@@ -41,6 +42,7 @@ import com.amazon.android.webkit.AmazonWebStorage;
 import com.amazon.android.webkit.AmazonWebView;
 import com.amazon.android.webkit.AmazonGeolocationPermissions;
 import com.amazon.android.webkit.AmazonMediaDeviceSettings;
+
 
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -115,6 +117,10 @@ public class CordovaChromeClient extends AmazonWebChromeClient {
      */
     @Override
     public boolean onJsAlert(AmazonWebView view, String url, String message, final AmazonJsResult result) {
+        Object returnVal = processJsCallback(url, message, null, result, "onJsAlert");
+        if (returnVal != null && returnVal instanceof Boolean && (Boolean) returnVal) {
+            return true;
+        }
         AlertDialog.Builder dlg = new AlertDialog.Builder(this.cordova.getActivity());
         dlg.setMessage(message);
         dlg.setTitle("Alert");
@@ -159,6 +165,10 @@ public class CordovaChromeClient extends AmazonWebChromeClient {
      */
     @Override
     public boolean onJsConfirm(AmazonWebView view, String url, String message, final AmazonJsResult result) {
+        Object returnVal = processJsCallback(url, message, null, result, "onJsCofirm");
+        if (returnVal != null && returnVal instanceof Boolean && (Boolean) returnVal) {
+            return true;
+        }
         AlertDialog.Builder dlg = new AlertDialog.Builder(this.cordova.getActivity());
         dlg.setMessage(message);
         dlg.setTitle("Confirm");
@@ -198,6 +208,7 @@ public class CordovaChromeClient extends AmazonWebChromeClient {
         return true;
     }
 
+    
     /**
      * Tell the client to display a prompt dialog to the user.
      * If the client returns true, AmazonWebView will assume that the client will
@@ -262,7 +273,11 @@ public class CordovaChromeClient extends AmazonWebChromeClient {
         }
 
         // Show dialog
-        else {
+        else {       	
+            Object returnVal = processJsCallback(url, message, defaultValue, result, "onJsPrompt");
+            if (returnVal != null && returnVal instanceof Boolean && (Boolean) returnVal) {
+                return true;
+            }
             final AmazonJsPromptResult res = result;
             AlertDialog.Builder dlg = new AlertDialog.Builder(this.cordova.getActivity());
             dlg.setMessage(message);
@@ -423,5 +438,34 @@ public class CordovaChromeClient extends AmazonWebChromeClient {
     public void onMediaDevicePermissionsShowPrompt(String origin, AmazonMediaDeviceSettings.Callback callback) {
         // Currently, media access should always be denied
         callback.invoke(false, true);
+    }
+    
+    /**
+     * This method will give chance for plugin to handle onJsAlert, onJsConfirm, onJsPrompt callback
+     * 
+     * @param url
+     * @param message
+     * @param defaultValue
+     * @param result
+     * @param messageType
+     * @return
+     */
+    private Object processJsCallback(String url, String message, String defaultValue, Object result, String messageType) {
+        if (appView.pluginManager != null) {
+            JSONObject data = new JSONObject();
+            try {
+                data.put("url", url);
+                data.put("message", message);
+                if (messageType.equals("onJsPrompt")) {
+                    data.put("defaultValue", defaultValue);
+                }
+                data.put("result", result);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return appView.pluginManager.postMessage(messageType, data);
+            
+        }
+        return null;
     }
 }

@@ -794,6 +794,16 @@ public class CordovaWebView extends AmazonWebView {
                     return true;
                 } else {
                     // If not bound
+
+                    // Give plugins a chance to override behavior
+                    if (this.pluginManager != null) {
+                        Object returnVal = this.pluginManager.postMessage("onBackPressed", null);
+                        if (returnVal != null && returnVal instanceof Boolean && (Boolean) returnVal) {
+                            // The return value was a true boolean, callback was consumed
+                            return true;
+                        }
+                    }
+
                     // Go to previous page in webview if it is possible to go back
                     if (this.backHistory()) {
                         return true;

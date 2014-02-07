@@ -225,37 +225,8 @@ public class CordovaActivity extends Activity implements CordovaInterface {
         Config.init(this);
         LOG.d(TAG, "CordovaActivity.onCreate()");
         super.onCreate(savedInstanceState);
-        try {
-        	if (!sFactoryInit) {
-                // To override the default factory (Chromium-based or Android WebKit factory), uncomment one of the following lines:
-                // AmazonWebKitFactories.setDefaultFactory("com.amazon.android.webkit.embedded.EmbeddedWebKitFactory");
-                // AmazonWebKitFactories.setDefaultFactory("com.amazon.android.webkit.android.AndroidWebKitFactory");
-                
-                factory = AmazonWebKitFactories.getDefaultFactory();
-                if (factory.isRenderProcess(this)) {
-                    return; // Do nothing if this is on render process
-                }
-                factory.setNativeLibraryPackage(AMAZON_WEBVIEW_LIB_PACKAGE);
-                factory.initialize(this);
-                factory.disableDeveloperTools();
-                // factory configuration
-                factory.getCookieManager().setAcceptCookie(true);
 
-                sFactoryInit = true;
-            } else {
-                factory = AmazonWebKitFactories.getDefaultFactory();
-            }
-
-        } catch (ExceptionInInitializerError e) {
-        	LOG.e(TAG, "WebKit factory initialization failed. Make sure you have android_interface.jar in libs folder.");
-        	displayError(ERROR_DIALOG_TITLE, ANDROID_WEBKIT_FACTORY_MISSING, ERROR_DIALOG_OK_BUTTON, true);
-        } catch (NoClassDefFoundError e) {
-        	LOG.e(TAG, "WebKit factory initialization failed. Make sure you have android_interface.jar in libs folder.");
-        	displayError(ERROR_DIALOG_TITLE, ANDROID_WEBKIT_FACTORY_MISSING, ERROR_DIALOG_OK_BUTTON, true);
-        } catch (Exception e) {
-        	LOG.e(TAG, "WebKit factory initialization failed.");
-        	displayError(ERROR_DIALOG_TITLE, ANDROID_WEBKIT_FACTORY_MISSING, ERROR_DIALOG_OK_BUTTON, true);
-        }
+        factory = buildAmazonWebkitFactory();
         
         if (savedInstanceState != null)
         {
@@ -349,6 +320,49 @@ public class CordovaActivity extends Activity implements CordovaInterface {
         return new CordovaChromeClient(this, webView);
     }
 
+    /**
+     * Construct the AmazonWebkitFactory
+     * 
+     * 
+     * @return AmazonWebkitFactory
+     */
+    protected  AmazonWebKitFactory buildAmazonWebkitFactory(){
+        AmazonWebKitFactory aFactory = null;
+        try {
+            
+            if (!sFactoryInit) {
+                // To override the default factory (Chromium-based or Android WebKit factory), uncomment one of the following lines:
+                // AmazonWebKitFactories.setDefaultFactory("com.amazon.android.webkit.embedded.EmbeddedWebKitFactory");
+                // AmazonWebKitFactories.setDefaultFactory("com.amazon.android.webkit.android.AndroidWebKitFactory");
+                // Select the default factory based on the preferred backend set on the Config class.
+
+                aFactory = AmazonWebKitFactories.getDefaultFactory();
+                if (aFactory.isRenderProcess(this)) {
+                    return aFactory; // Do nothing if this is on render process
+                }
+                aFactory.setNativeLibraryPackage(AMAZON_WEBVIEW_LIB_PACKAGE);
+                aFactory.initialize(this);
+                aFactory.disableDeveloperTools();
+                // factory configuration
+                aFactory.getCookieManager().setAcceptCookie(true);
+                sFactoryInit = true;
+            } else {
+                aFactory = AmazonWebKitFactories.getDefaultFactory();
+            }        
+
+        } catch (ExceptionInInitializerError e) {
+            LOG.e(TAG, "WebKit factory initialization failed. Make sure you have android_interface.jar in libs folder.");
+            displayError(ERROR_DIALOG_TITLE, ANDROID_WEBKIT_FACTORY_MISSING, ERROR_DIALOG_OK_BUTTON, true);
+        } catch (NoClassDefFoundError e) {
+            LOG.e(TAG, "WebKit factory initialization failed. Make sure you have android_interface.jar in libs folder.");
+            displayError(ERROR_DIALOG_TITLE, ANDROID_WEBKIT_FACTORY_MISSING, ERROR_DIALOG_OK_BUTTON, true);
+        } catch (Exception e) {
+            LOG.e(TAG, "WebKit factory initialization failed.");
+            displayError(ERROR_DIALOG_TITLE, ANDROID_WEBKIT_FACTORY_MISSING, ERROR_DIALOG_OK_BUTTON, true);
+        }
+        
+        return aFactory;
+    }
     /**
      * Create and initialize web container with default web view objects.
      */
