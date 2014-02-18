@@ -18,7 +18,52 @@
 # under the License.
 #
 -->
-## Release Notes for Cordova (Android) ##
+## Release Notes for Cordova (Amazon FireOS) ##
+
+### 3.4.0 (Feb 2014) ###
+
+* CB-5398 Apply KitKat content URI fix to all content URIs
+* CB-5398 Work-around for KitKat content: URLs not rendering in <img> tags
+* CB-5908: add splascreen images to template
+* Updated check_requirements functions to see if AWV sdk is installed in libs folder. This code used
+* Updated check_requirements functions to see if AWV sdk is installed in libs folder. This code used
+* Added Log.e when Config is not initialised but accessed
+* CB-5395: Make scheme and host (but not path) case-insensitive in whitelist
+* Fix broken build from prev. commit (copy & paste error?)
+* Ignore multiple onPageFinished() callbacks & onReceivedError due to stopLoading()
+* Removing addJavascriptInterface support from all Android versions lower than 4.2 due to security vu
+* Update JS snapshot to version 3.5.0-dev (via coho)
+* Fixed create.js + added code to copy libs folder to app's libs.
+* Removing getNameRes() function to get webview backend. Removed strings as well.
+* CB-5232 Change create script to use Cordova as a library.
+* Remove Application settings from framework/AndroidManifest.xml
+* Updated android platform target to android-19.
+* CB-4984 Don't create on CordovaActivity name
+* CB-5917 Add a loadUrlIntoView overload that doesn't recreate plugins.
+* CB-5715 For CLI, hide assets/www and res/xml/config.xml by default
+* CB-5793 ant builds: Rename AndroidManifest during -post-build to avoid Eclipse detecting ant-build/
+* CB-5889 Make update script find project name instead of using "null" for CordovaLib
+* CB-5889 Add a message in the update script about needing to import CordovaLib when using an IDE.
+* Fix type "LANCH" -> "LAUNCH"
+* CB-5793 Make ant work-around work on windows.
+* CB-5793 Add work-around for library references not working with custom output directory (ugh).
+* CB-5793 Forgot to update ant path for clean.
+* CB-5793 Don't clean before build and change output directory to ant-build to avoid conflicts with E
+* CB-4910 Fix CLI's eclipse project template not working on windows due to "\*" in the virtual folder
+* CB-5803 Fix cordova/emulate on windows.
+* CB-5801 Add spawn work-around on windows for it not being able to execute .cmd files
+* CB-5801 exec->spawn in build to make sure compile errors are shown.
+* CB-5799 Update version of OkHTTP to 1.3
+* Remove package.json within bin/ since we never intend to ship bin/ as an npm module
+* CB-4910 Update CLI project template to point to config.xml at the root now that it's not in www/ by
+* Silence excessive logging from scroll events
+* CB-5504: Adding onDestroy to app plugin to deregister telephonyReceiver
+* 1. Removed timers logic while loading Urls. Timers were creating threads to check for errors. That
+* Fix for Search Intercept failures
+* Add Timeout Tests
+* Fixes for Cordova 3.3 Instrumentation Tests
+* Update JS snapshot to version 3.5.0-dev (via coho)
+* Set VERSION to 3.5.0-dev (via coho)
 
 ### 3.3.0 (Dec 2013) ###
 
