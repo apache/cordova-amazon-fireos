@@ -186,6 +186,32 @@ public class CordovaWebView extends AmazonWebView {
         this.setup();
     }
 
+////fireos_change ////
+    /**
+     * Constructor 
+     * The extraData bundle is needed for AmazonWebChromeClient.onCreateWindow callback.
+     * It's just an opaque data that needs to be passed from one call to the other.
+     * 
+     * @param context
+     * @param extraData 
+     */
+    public CordovaWebView(Context context, Bundle extraData) {
+        super(context);
+ 
+        if (CordovaInterface.class.isInstance(context))
+        {
+            this.cordova = (CordovaInterface) context;
+            this.cordova.getFactory().initializeWebView(this, 0xFFFFFF, false, extraData);
+        }
+        else
+        {
+            Log.d(TAG, "Your activity must implement CordovaInterface to work");
+        }
+        this.loadConfiguration();
+        this.setup();
+    }
+////fireos_change ////
+    
     /**
      * Constructor.
      *
