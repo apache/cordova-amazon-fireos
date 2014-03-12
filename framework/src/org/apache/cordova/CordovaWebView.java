@@ -755,6 +755,49 @@ public class CordovaWebView extends AmazonWebView {
         return p.toString();
     }
 
+    /**
+     * Handle when the back button is pressed on the current window. Depending on the state of the application, this
+     * will either navigate back in the history, close the window, send a back event to the running web application,
+     * or dismiss a full screen video.
+     */
+    public void onBackPressed() {
+        // A custom view is currently displayed (e.g. playing a video)
+        if (mCustomView != null) {
+            this.hideCustomView();
+        } else {
+            // The webview is currently displayed
+            // If back key is bound, then send event to JavaScript
+            if (this.bound) {
+                this.loadUrl("javascript:cordova.fireDocumentEvent('backbutton');");
+                return;
+            } else {
+                // If not bound
+
+                // Give plugins a chance to override behavior
+                if (this.pluginManager != null) {
+                    Object returnVal = this.pluginManager.postMessage("onBackPressed", null);
+                    if (returnVal != null && returnVal instanceof Boolean && (Boolean) returnVal) {
+                        // The return value was a true boolean, callback was consumed
+                        return;
+                    }
+                }
+
+                // Go to previous page in webview if it is possible to go back
+                if (this.backHistory()) {
+                    return;
+                }
+                // If not, then invoke default behavior
+                else {
+                    // this.activityState = ACTIVITY_EXITING;
+                    // return false;
+                    // If they hit back button when app is initializing, app should exit instead of hang until
+                    // initialization (CB2-458)
+                    this.cordova.getActivity().finish();
+                }
+            }
+        }
+    }
+
     /*
      * onKeyDown
      */
@@ -780,10 +823,6 @@ public class CordovaWebView extends AmazonWebView {
                 return super.onKeyDown(keyCode, event);
             }
         }
-        else if(keyCode == KeyEvent.KEYCODE_BACK)
-        {
-            return !(this.startOfHistory()) || this.bound;
-        }
         else if(keyCode == KeyEvent.KEYCODE_MENU)
         {
             //How did we get here?  Is there a childView?
@@ -807,45 +846,8 @@ public class CordovaWebView extends AmazonWebView {
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event)
     {
-        // If back key
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            // A custom view is currently displayed  (e.g. playing a video)
-            if(mCustomView != null) {
-                this.hideCustomView();
-            } else {
-                // The webview is currently displayed
-                // If back key is bound, then send event to JavaScript
-                if (this.bound) {
-                    this.loadUrl("javascript:cordova.fireDocumentEvent('backbutton');");
-                    return true;
-                } else {
-                    // If not bound
-
-                    // Give plugins a chance to override behavior
-                    if (this.pluginManager != null) {
-                        Object returnVal = this.pluginManager.postMessage("onBackPressed", null);
-                        if (returnVal != null && returnVal instanceof Boolean && (Boolean) returnVal) {
-                            // The return value was a true boolean, callback was consumed
-                            return true;
-                        }
-                    }
-
-                    // Go to previous page in webview if it is possible to go back
-                    if (this.backHistory()) {
-                        return true;
-                    }
-                    // If not, then invoke default behavior
-                    else {
-                        //this.activityState = ACTIVITY_EXITING;
-                    	//return false;
-                    	// If they hit back button when app is initializing, app should exit instead of hang until initialization (CB2-458)
-                    	this.cordova.getActivity().finish();
-                    }
-                }
-            }
-        }
         // Legacy
-        else if (keyCode == KeyEvent.KEYCODE_MENU) {
+        if (keyCode == KeyEvent.KEYCODE_MENU) {
             if (this.lastMenuEventTime < event.getEventTime()) {
                 this.loadUrl("javascript:cordova.fireDocumentEvent('menubutton');");
             }

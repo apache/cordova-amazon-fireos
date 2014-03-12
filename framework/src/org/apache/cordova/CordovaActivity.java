@@ -1175,11 +1175,25 @@ public class CordovaActivity extends Activity implements CordovaInterface {
         this.runOnUiThread(runnable);
     }
 
+    /*
+     * Overriding the onBackPressed since it more accurately reflects when a back button is pressed within the context
+     * of this Activity. For instance if another Activity displayed on top of this one closes itself in onKeyDown, only
+     * the onKeyUp is received which would unintentionally navigate back.
+     */
+    @Override
+    public void onBackPressed() {
+        if (appView != null && (appView.isCustomViewShowing() || appView.getFocusedChild() != null)) {
+            appView.onBackPressed();
+        } else {
+            super.onBackPressed();
+        }
+    }
+
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event)
     {
-        if (appView != null && (appView.isCustomViewShowing() || appView.getFocusedChild() != null ) &&
-                (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_MENU)) {
+        if (appView != null && (appView.isCustomViewShowing() || appView.getFocusedChild() != null) &&
+            keyCode == KeyEvent.KEYCODE_MENU) {
             return appView.onKeyUp(keyCode, event);
         } else {
             return super.onKeyUp(keyCode, event);
@@ -1196,9 +1210,9 @@ public class CordovaActivity extends Activity implements CordovaInterface {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event)
     {
-        //Determine if the focus is on the current view or not
-        if (appView != null && appView.getFocusedChild() != null && (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_MENU)) {
-                    return appView.onKeyDown(keyCode, event);
+        // Determine if the focus is on the current view or not
+        if (appView != null && appView.getFocusedChild() != null && keyCode == KeyEvent.KEYCODE_MENU) {
+            return appView.onKeyDown(keyCode, event);
         }
         else
             return super.onKeyDown(keyCode, event);
