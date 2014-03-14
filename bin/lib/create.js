@@ -100,6 +100,15 @@ function copyScripts(projectPath) {
     shell.rm('-rf', destScriptsDir);
     // Copy in the new ones.
     shell.cp('-r', srcScriptsDir, projectPath);
+    [
+        'build',
+        'clean',
+        'log',
+         'run',
+         'version',
+    ].forEach(function(f) { 
+           shell.chmod(755, path.join(destScriptsDir, f));
+    });
     shell.cp('-r', path.join(ROOT, 'bin', 'node_modules'), destScriptsDir);
     shell.cp(path.join(ROOT, 'bin', 'check_reqs'), path.join(destScriptsDir, 'check_reqs'));
     shell.cp(path.join(ROOT, 'bin', 'lib', 'check_reqs.js'), path.join(projectPath, 'cordova', 'lib', 'check_reqs.js'));
