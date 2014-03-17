@@ -47,7 +47,7 @@ public class PluginManager {
     private static final int SLOW_EXEC_WARNING_THRESHOLD = Debug.isDebuggerConnected() ? 60 : 16;
 
     // List of service entries, sorted by priority
-    private final HashMap<String, PluginEntry> entries = new LinkedHashMap<String, PluginEntry>();
+    private HashMap<String, PluginEntry> entries = new LinkedHashMap<String, PluginEntry>();
 
     private final CordovaInterface ctx;
     private final CordovaWebView app;
@@ -331,25 +331,28 @@ public class PluginManager {
 		List<PluginEntry> pluginEntries = new ArrayList<PluginEntry>(entries.values());
 		pluginEntries.add(entry);
 
-		// clear list and recreate final set entries in priority order
-		entries.clear();
+		// recreate final set entries in priority order
 		this.addServices(pluginEntries);
 	}
 
-	/**
-	 * Takes a list of plugin entries which are first sorted by priority and
-	 * then individually added to the final ordered hashmap. This does not
-	 * create the plugin object instance.
-	 *
-	 * @param services
-	 *            the list of services to sort and add to final entry hash
-	 */
-	private void addServices(List<PluginEntry> services) {
-		Collections.sort(services);
-		for (PluginEntry pluginEntry : services) {
-			this.entries.put(pluginEntry.service, pluginEntry);
-		}
-	}
+    /**
+     * Takes a list of plugin entries which are first sorted by priority and then individually added to the final
+     * ordered hashmap. This does not create the plugin object instance.
+     * 
+     * @param services
+     *            the list of services to sort and add to final entry hash
+     */
+    private void addServices(List<PluginEntry> services) {
+        // sort the list of services by priority
+        Collections.sort(services);
+
+        // create a new map from the prioritized list, and use it as the primary set of entries
+        HashMap<String, PluginEntry> tmpEntries = new LinkedHashMap<String, PluginEntry>();
+        for (PluginEntry pluginEntry : services) {
+            tmpEntries.put(pluginEntry.service, pluginEntry);
+        }
+        this.entries = tmpEntries;
+    }
 
     /**
      * Called when the system is about to start resuming a previous activity.

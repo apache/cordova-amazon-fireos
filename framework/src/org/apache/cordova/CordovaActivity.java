@@ -367,7 +367,7 @@ public class CordovaActivity extends Activity implements CordovaInterface {
      * Create and initialize web container with default web view objects.
      */
     public void init() {
-    	if (factory != null) {
+        if (factory != null && this.appView == null) {
     		CordovaWebView webView = makeWebView();
     		this.init(webView, makeWebViewClient(webView), makeChromeClient(webView));
     	}
