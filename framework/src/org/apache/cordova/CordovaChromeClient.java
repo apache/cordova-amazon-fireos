@@ -150,7 +150,6 @@ public class CordovaChromeClient extends AmazonWebChromeClient {
                     return true;
             }
         });
-        dlg.create();
         dlg.show();
         return true;
     }
@@ -203,7 +202,6 @@ public class CordovaChromeClient extends AmazonWebChromeClient {
                     return true;
             }
         });
-        dlg.create();
         dlg.show();
         return true;
     }
@@ -300,7 +298,6 @@ public class CordovaChromeClient extends AmazonWebChromeClient {
                             res.cancel();
                         }
                     });
-            dlg.create();
             dlg.show();
         }
         return true;
