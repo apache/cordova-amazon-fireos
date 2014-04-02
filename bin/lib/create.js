@@ -69,6 +69,7 @@ function copyJsAndLibrary(projectPath, shared, projectName) {
     });
     if (!shared) {
         shell.mkdir('-p', nestedCordovaLibPath);
+        shell.mkdir('-p', path.join(ROOT, 'framework', 'libs'));
         shell.cp('-f', path.join(ROOT, 'framework', 'AndroidManifest.xml'), nestedCordovaLibPath);
         shell.cp('-f', path.join(ROOT, 'framework', 'project.properties'), nestedCordovaLibPath);
         shell.cp('-r', path.join(ROOT, 'framework', 'src'), nestedCordovaLibPath);
