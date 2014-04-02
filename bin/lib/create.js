@@ -133,7 +133,8 @@ function copyScripts(projectPath) {
 
 exports.createProject = function(project_path, package_name, project_name, project_template_dir, use_shared_project, use_cli_template) {
     var VERSION = fs.readFileSync(path.join(ROOT, 'VERSION'), 'utf-8').trim();
-
+    var awv_interface='awv_interface.jar';
+    
     // Set default values for path, package and name
     project_path = typeof project_path !== 'undefined' ? project_path : "CordovaExample";
     project_path = path.relative(process.cwd(), project_path);
@@ -158,12 +159,21 @@ exports.createProject = function(project_path, package_name, project_name, proje
     if (!/[a-zA-Z0-9_]+\.[a-zA-Z0-9_](.[a-zA-Z0-9_])*/.test(package_name)) {
         return Q.reject('Package name must look like: com.company.Name');
     }
-
+    
+    var awv_interface_expected_path=path.join(ROOT, 'framework','libs');
+    console.log('awv_path : ' + awv_interface_expected_path);
+    if (!fs.existsSync(awv_interface_expected_path)) {
+        shell.mkdir('-p', awv_interface_expected_path);
+    }
+    
+    if (!fs.existsSync(path.join(awv_interface_expected_path,awv_interface))) {
+        return Q.reject(new Error('awv_interface.jar not found in ' + awv_interface_expected_path +' folder. \nPlease download the AmazonWebView SDK from http://developer.amazon.com/sdk/fire/IntegratingAWV.html#installawv and copy the awv_interface.jar file to this folder:' + awv_interface_expected_path + ' and re-run cordova platform add amazon-fireos command.'));
+    }
     // Check that requirements are met and proper targets are installed
     return check_reqs.run()
     .then(function() {
         // Log the given values for the project
-        console.log('Creating Cordova project for the Android platform:');
+        console.log('Creating Cordova project for the amazon-fireos platform:');
         console.log('\tPath: ' + project_path);
         console.log('\tPackage: ' + package_name);
         console.log('\tName: ' + project_name);
