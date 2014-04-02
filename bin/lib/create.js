@@ -160,7 +160,7 @@ exports.createProject = function(project_path, package_name, project_name, proje
     if (!/[a-zA-Z0-9_]+\.[a-zA-Z0-9_](.[a-zA-Z0-9_])*/.test(package_name)) {
         return Q.reject('Package name must look like: com.company.Name');
     }
-    
+
     //See if commonlibs exists under root .cordova folder. If not, prompt the error and exit
     var HOME = process.env[(process.platform.slice(0, 3) == 'win') ? 'USERPROFILE' : 'HOME'];
     var global_config_path = path.join(HOME, '.cordova');
