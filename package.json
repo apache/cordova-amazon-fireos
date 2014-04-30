@@ -1,0 +1,21 @@
+{
+  "name": "cordova-amazon-fireos",
+  "version": "3.4.0",
+  "description": "cordova-amazon-fireos release",
+  "main": "bin/create",
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://git-wip-us.apache.org/repos/asf/cordova-amazon-fireos.git"
+  },
+  "keywords": [
+    "amazon",
+    "fireos",
+    "apache",
+    "cordova"
+  ],
+  "author": "Apache Software Foundation",
+  "license": "Apache Version 2.0"
+}
