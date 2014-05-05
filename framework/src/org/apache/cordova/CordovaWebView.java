@@ -961,6 +961,8 @@ public class CordovaWebView extends AmazonWebView {
                 Log.e(TAG, "Error unregistering configuration receiver: " + e.getMessage(), e);
             }
         }
+        
+        this.destroy();
     }
     
     public void onNewIntent(Intent intent)
