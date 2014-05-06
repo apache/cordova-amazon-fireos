@@ -37,6 +37,9 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.media.AudioManager;
@@ -331,7 +334,8 @@ public class CordovaActivity extends Activity implements CordovaInterface {
         try {
             
             if (!sFactoryInit) {
-                // To override the default factory (Chromium-based or Android WebKit factory), uncomment one of the following lines:
+                // To override the default factory (Chromium-based or Android WebKit factory), uncomment one of the
+                // following lines:
                 // AmazonWebKitFactories.setDefaultFactory("com.amazon.android.webkit.embedded.EmbeddedWebKitFactory");
                 // AmazonWebKitFactories.setDefaultFactory("com.amazon.android.webkit.android.AndroidWebKitFactory");
                 // Select the default factory based on the preferred backend set on the Config class.
@@ -342,13 +346,27 @@ public class CordovaActivity extends Activity implements CordovaInterface {
                 }
                 aFactory.setNativeLibraryPackage(AMAZON_WEBVIEW_LIB_PACKAGE);
                 aFactory.initialize(this);
-                aFactory.disableDeveloperTools();
+                
+                // Determine whether we're in debug or release mode, and turn on developer tools !
+                // To use, run this on the command line (needs Android SDK), replace com.example.helloworld with your packageName(printed in log):
+                // adb forward tcp:9222 localabstract:com.example.helloworld.devtools
+                // Then, open this URL: http://localhost:9222 in your browser
+                final String packageName = this.getPackageName();
+                ApplicationInfo appInfo = this.getPackageManager().getApplicationInfo(packageName, PackageManager.GET_META_DATA);
+                
+                if (((appInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) &&
+                    (aFactory.getWebKitCapabilities().isDeveloperToolsSupported())) {
+                    aFactory.enableDeveloperToolsUnix(packageName + ".devtools");
+                    LOG.d(TAG,"DevTools available on localabstract:" + packageName + ".devtools");
+                } else {
+                    aFactory.disableDeveloperTools();
+                }
                 // factory configuration
                 aFactory.getCookieManager().setAcceptCookie(true);
                 sFactoryInit = true;
             } else {
                 aFactory = AmazonWebKitFactories.getDefaultFactory();
-            }        
+            }
 
         } catch (ExceptionInInitializerError e) {
             LOG.e(TAG, "WebKit factory initialization failed. Make sure you have android_interface.jar in libs folder.");
@@ -367,7 +385,7 @@ public class CordovaActivity extends Activity implements CordovaInterface {
      * Create and initialize web container with default web view objects.
      */
     public void init() {
-        if (factory != null && this.appView == null) {
+    	if (factory != null) {
     		CordovaWebView webView = makeWebView();
     		this.init(webView, makeWebViewClient(webView), makeChromeClient(webView));
     	}
