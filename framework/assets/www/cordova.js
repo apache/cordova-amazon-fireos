@@ -1458,7 +1458,7 @@ exports.reset();
 define("cordova/platform", function(require, exports, module) {
 
 module.exports = {
-    id: 'android',
+    id: 'amazon-fireos',
     bootstrap: function() {
         var channel = require('cordova/channel'),
             cordova = require('cordova'),
