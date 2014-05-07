@@ -1,5 +1,5 @@
 // Platform: amazon-fireos
-// 3.6.0-dev-6a716cc
+// 3.6.0-dev-7e845f3
 /*
  Licensed to the Apache Software Foundation (ASF) under one
  or more contributor license agreements.  See the NOTICE file
@@ -19,7 +19,7 @@
  under the License.
 */
 ;(function() {
-var CORDOVA_JS_BUILD_LABEL = '3.6.0-dev-6a716cc';
+var CORDOVA_JS_BUILD_LABEL = '3.6.0-dev-7e845f3';
 // file: src/scripts/require.js
 
 /*jshint -W079 */
@@ -1458,7 +1458,7 @@ exports.reset();
 define("cordova/platform", function(require, exports, module) {
 
 module.exports = {
-    id: 'android',
+    id: 'amazon-fireos',
     bootstrap: function() {
         var channel = require('cordova/channel'),
             cordova = require('cordova'),
