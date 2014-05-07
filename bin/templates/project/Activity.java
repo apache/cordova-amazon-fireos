@@ -29,9 +29,17 @@ public class __ACTIVITY__ extends CordovaActivity
     {
         super.onCreate(savedInstanceState);
         super.init();
-        // Set by <content src="index.html" /> in config.xml
-        super.loadUrl(Config.getStartUrl());
-        //super.loadUrl("file:///android_asset/www/index.html");
+        
+        /* Check to make sure Amazon WebView library loaded correctly.
+         * For more information, see the Cordova Amazon Fire OS Platform Guide:
+         * http://cordova.apache.org/docs/en/edge/guide_platforms_amazonfireos_index.md.html
+         */
+        if (this.appView != null) {
+            // Set by <content src="index.html" /> in config.xml
+            super.loadUrl(Config.getStartUrl());
+            //super.loadUrl("file:///android_asset/www/index.html");
+
+        }
     }
 }
 
