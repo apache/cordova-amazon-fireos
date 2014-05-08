@@ -20,6 +20,38 @@
 -->
 ## Release Notes for Cordova (Amazon FireOS) ##
 
+### 3.5.0 (May 2014) ###
+
+76 commits from 14 authors. Highlights include:
+
+* [CB-6644][amazon-fireos]Add a check for webview being null in template code Added a check and some comments to guide devs.
+* [CB-6487]WebView not found in Chrome remote debugging
+* [CB-6636][amazon-fireos]Need to destroy webview properly Added destroy() call in webview's handleDestroy() method.
+* CB-6491 add CONTRIBUTING.md
+* CB-6543 Fix cordova/run failure when no custom_rules.xml available
+* defaults.xml: Add AndroidLaunchMode preference
+* Add JavaDoc for CordovaResourceApi
+* Updated log statement - android=>amazon-fireos.
+* Added amazon xmlns to project's template AndroidManifest.xml.
+* [CB-6392]Addig amazon-fireos platform fails with not so good error reporting Fixes 2 issues while adding amazon-fireos platform after fresh cordova install. 1. create.js updated to create "libs" folder before copying it to the project's platform folder. Also, checking for awv_interface.jar existance is moved to create_project(). 2. check_reqs.js no longer checks for awv_interface.jar.
+* Fixes 2 issues while adding amazon-fireos platform after fresh cordova install. 1. create.js updated to create "libs" folder before copying it to the project's platform folder. 2. check_reqs.js updated to report error and abort if awv_interface.jar is missing from libs folder.
+* CB-6556: added top level pacakge.json file
+* Adding a safety check to prevent applications from calling init twice Changes to address thread safety concerns in Cordova plugin management
+* CB-6388: Handle binary data correctly in LOAD_URL bridge
+* Fix CB-6048: Set launchMode=singleTop so tapping app icon does not always restart app
+* Remove incorrect usage of AlertDialog.Builder.create
+* Fixing back button issue by utilizing onBackPressed instead of onKeyUp
+* CB-5744 Unable to build Hello World application for Kindle Fire HDX tablet using PhoneGap 3.3.0
+* Added overloaded constructor for CordovaWebView with Bundle as parameter. Need it for AmazonWebChromeClient.onCreateWindow callback.
+* Catch uncaught exceptions in from plugins and turn them into error responses.
+* CB-6047 Fix online sometimes getting in a bad state on page transitions.
+* Add another convenience overload for CordovaResourceApi.copyResource
+* Update framework's .classpath to what Eclipse wants it to be.
+* Updated android target to android-19.
+* README.md: `android update` to `android-19`.
+* Fix NPE when POLLING bridge mode is used.
+* Updating NOTICE to include Square for OkHttp
+
 ### 3.4.0 (Feb 2014) ###
 
 * CB-5398 Apply KitKat content URI fix to all content URIs
