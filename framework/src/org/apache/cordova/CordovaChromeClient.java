@@ -152,7 +152,7 @@ public class CordovaChromeClient extends AmazonWebChromeClient {
      */
     @Override
     public boolean onJsConfirm(AmazonWebView view, String url, String message, final AmazonJsResult result) {
-        Object returnVal = processJsCallback(url, message, null, result, "onJsCofirm");
+        Object returnVal = processJsCallback(url, message, null, result, "onJsConfirm");
         if (returnVal != null && returnVal instanceof Boolean && (Boolean) returnVal) {
             return true;
         }
