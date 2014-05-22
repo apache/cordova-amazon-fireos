@@ -138,18 +138,6 @@ public class CordovaChromeClient extends AmazonWebChromeClient {
                         result.cancel();
                     }
                 });
-        dlg.setOnKeyListener(new DialogInterface.OnKeyListener() {
-            //DO NOTHING
-            public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
-                if (keyCode == KeyEvent.KEYCODE_BACK)
-                {
-                    result.confirm();
-                    return false;
-                }
-                else
-                    return true;
-            }
-        });
         dlg.show();
         return true;
     }
@@ -190,18 +178,6 @@ public class CordovaChromeClient extends AmazonWebChromeClient {
                         result.cancel();
                     }
                 });
-        dlg.setOnKeyListener(new DialogInterface.OnKeyListener() {
-            //DO NOTHING
-            public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
-                if (keyCode == KeyEvent.KEYCODE_BACK)
-                {
-                    result.cancel();
-                    return false;
-                }
-                else
-                    return true;
-            }
-        });
         dlg.show();
         return true;
     }
