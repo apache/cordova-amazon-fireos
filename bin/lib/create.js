@@ -161,15 +161,28 @@ exports.createProject = function(project_path, package_name, project_name, proje
         return Q.reject('Package name must look like: com.company.Name');
     }
     
+    //See if commonlibs exists under root .cordova folder. If not, prompt the error and exit
+    var HOME = process.env[(process.platform.slice(0, 3) == 'win') ? 'USERPROFILE' : 'HOME'];
+    var global_config_path = path.join(HOME, '.cordova');
+    var lib_path = path.join(global_config_path, 'lib');
+    var awv_sdk_expected_path=path.join(lib_path, 'commonlibs');
+    var awv_interface_jar_commonlib_path = path.join(awv_sdk_expected_path, awv_interface);
+    console.log('Checking if awv sdk is installed at : ' + awv_sdk_expected_path);
+    if (!fs.existsSync(awv_sdk_expected_path) || !fs.existsSync(awv_interface_jar_commonlib_path)) {
+        shell.mkdir('-p',awv_sdk_expected_path);
+        var msg = '\n*********************************\n\nAmazon WebView API Library Not Found.\n\nPlease download the AmazonWebView SDK from:\n\nhttps://developer.amazon.com/public/solutions/platforms/android-fireos/docs/building-and-testing-your-hybrid-app\n\nThen copy awv_interface.jar from the SDK into this folder:\n\n' + awv_sdk_expected_path + '\n\nRe-run \'cordova platform add amazon-fireos\' to finish adding Amazon Fire OS support to your project.\n\n*********************************\n';
+        console.log(msg);
+        return Q.resolve();
+
+    } 
+    //Copy awv_interface.jar to ~/.cordova/lib/amazon-fireos/cordova/[cordova_release]/framework/libs folder.
     var awv_interface_expected_path=path.join(ROOT, 'framework','libs');
     console.log('awv_path : ' + awv_interface_expected_path);
-    if (!fs.existsSync(awv_interface_expected_path)) {
+    if (!fs.existsSync(awv_interface_expected_path) || !fs.existsSync(path.join(awv_interface_expected_path, awv_interface))) {
         shell.mkdir('-p', awv_interface_expected_path);
-    }
-    
-    if (!fs.existsSync(path.join(awv_interface_expected_path,awv_interface))) {
-        return Q.reject(new Error('awv_interface.jar not found in ' + awv_interface_expected_path +' folder. \nPlease download the AmazonWebView SDK from http://developer.amazon.com/sdk/fire/IntegratingAWV.html#installawv and copy the awv_interface.jar file to this folder:' + awv_interface_expected_path + ' and re-run cordova platform add amazon-fireos command.'));
-    }
+        shell.cp(awv_interface_jar_commonlib_path, awv_interface_expected_path);
+    } 
+          
     // Check that requirements are met and proper targets are installed
     return check_reqs.run()
     .then(function() {
