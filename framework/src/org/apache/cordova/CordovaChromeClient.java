@@ -114,6 +114,7 @@ public class CordovaChromeClient extends AmazonWebChromeClient {
      * @param url
      * @param message
      * @param result
+     * @see Other implementation in the Dialogs plugin.
      */
     @Override
     public boolean onJsAlert(AmazonWebView view, String url, String message, final AmazonJsResult result) {
@@ -149,6 +150,7 @@ public class CordovaChromeClient extends AmazonWebChromeClient {
      * @param url
      * @param message
      * @param result
+     * @see Other implementation in the Dialogs plugin.
      */
     @Override
     public boolean onJsConfirm(AmazonWebView view, String url, String message, final AmazonJsResult result) {
@@ -196,6 +198,7 @@ public class CordovaChromeClient extends AmazonWebChromeClient {
      * @param message
      * @param defaultValue
      * @param result
+     * @see Other implementation in the Dialogs plugin.
      */
     @Override
     public boolean onJsPrompt(AmazonWebView view, String url, String message, String defaultValue, AmazonJsPromptResult result) {
