@@ -861,6 +861,27 @@ public class CordovaWebView extends AmazonWebView {
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event)
     {
+        // If back key
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            // A custom view is currently displayed  (e.g. playing a video)
+            if(mCustomView != null) {
+                this.hideCustomView();
+            } else {
+                // The webview is currently displayed
+                // If back key is bound, then send event to JavaScript
+                if (this.bound) {
+                    this.loadUrl("javascript:cordova.fireDocumentEvent('backbutton');");
+                    return true;
+                } else {
+                    // If not bound
+                    // Go to previous page in webview if it is possible to go back
+                    if (this.backHistory()) {
+                        return true;
+                    }
+                    // If not, then invoke default behavior
+                }
+            }
+        }
         // Legacy
         if (keyCode == KeyEvent.KEYCODE_MENU) {
             if (this.lastMenuEventTime < event.getEventTime()) {
