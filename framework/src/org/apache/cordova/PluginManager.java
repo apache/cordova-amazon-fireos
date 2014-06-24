@@ -171,6 +171,7 @@ public class PluginManager {
                     pluginClass = "";
                     priority = 0;
                     insideFeature = false;
+                    onload = false;
                 }
             }
             try {
