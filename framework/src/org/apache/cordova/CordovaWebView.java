@@ -496,17 +496,7 @@ public class CordovaWebView extends AmazonWebView {
             this.loadUrlNow(url);
         }
         else {
-
-            String initUrl = this.getProperty("url", null);
-
-            // If first page of app, then set URL to load to be the one passed in
-            if (initUrl == null) {
-                this.loadUrlIntoView(url);
-            }
-            // Otherwise use the URL specified in the activity's extras bundle
-            else {
-                this.loadUrlIntoView(initUrl);
-            }
+            this.loadUrlIntoView(url);
         }
     }
 
@@ -517,16 +507,15 @@ public class CordovaWebView extends AmazonWebView {
      * @param url
      * @param time              The number of ms to wait before loading webview
      */
+    @Deprecated
     public void loadUrl(final String url, int time) {
-        String initUrl = this.getProperty("url", null);
-
-        // If first page of app, then set URL to load to be the one passed in
-        if (initUrl == null) {
-            this.loadUrlIntoView(url, time);
+        if(url == null)
+        {
+            this.loadUrlIntoView(Config.getStartUrl());
         }
-        // Otherwise use the URL specified in the activity's extras bundle
-        else {
-            this.loadUrlIntoView(initUrl);
+        else
+        {
+            this.loadUrlIntoView(url);
         }
     }
 
