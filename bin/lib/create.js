@@ -118,6 +118,50 @@ function copyScripts(projectPath) {
 }
 
 /**
+ * Test whether a package name is acceptable for use as an android project.
+ * Returns a promise, fulfilled if the package name is acceptable; rejected
+ * otherwise.
+ */
+function validatePackageName(package_name) {
+    //Make the package conform to Java package types
+    if (!/[a-zA-Z0-9_]+\.[a-zA-Z0-9_](.[a-zA-Z0-9_])*/.test(package_name)) {
+        return Q.reject('Package name must look like: com.company.Name');
+    }
+
+    //Enforce underscore limitation
+    if (/[_]+[a-zA-Z0-9_]*/.test(package_name)) {
+        return Q.reject("Package name can't begin with an underscore");
+    }
+
+    //Class is a reserved word
+    if(/[C|c]+lass+[\s|\.]/.test(package_name) && !/[a-zA-Z0-9_]+[C|c]+lass/.test(package_name))
+    {
+        return Q.reject('class is a reserved word');
+    }
+
+    return Q.resolve();
+}
+
+/**
+ * Test whether a project name is acceptable for use as an android class.
+ * Returns a promise, fulfilled if the project name is acceptable; rejected
+ * otherwise.
+ */
+function validateProjectName(project_name) {
+    //Enforce stupid name error
+    if (project_name === 'CordovaActivity') {
+        return Q.reject('Project name cannot be CordovaActivity');
+    }
+
+    //Classes in Java don't begin with numbers
+    if (/^[0-9]/.test(project_name)) {
+        return Q.reject('Project name must not begin with a number');
+    }
+
+    return Q.resolve();
+}
+
+/**
  * $ create [options]
  *
  * Creates an android application with the given options.
@@ -156,12 +200,7 @@ exports.createProject = function(project_path, package_name, project_name, proje
     if(fs.existsSync(project_path)) {
         return Q.reject('Project already exists! Delete and recreate');
     }
-
-    //Make the package conform to Java package types
-    if (!/[a-zA-Z0-9_]+\.[a-zA-Z0-9_](.[a-zA-Z0-9_])*/.test(package_name)) {
-        return Q.reject('Package name must look like: com.company.Name');
-    }
-
+  
     //See if commonlibs exists under root .cordova folder. If not, prompt the error and exit
     var HOME = process.env[(process.platform.slice(0, 3) == 'win') ? 'USERPROFILE' : 'HOME'];
     var global_config_path = path.join(HOME, '.cordova');
@@ -184,30 +223,15 @@ exports.createProject = function(project_path, package_name, project_name, proje
         shell.cp(awv_interface_jar_commonlib_path, awv_interface_expected_path);
     } 
 
-    //Enforce underscore limitation
-    if (/[_]+[a-zA-Z0-9_]*/.test(package_name)) {
-        return Q.reject("Package name can't begin with an underscore");
-    }
-
-    //Enforce stupid name error
-    if (project_name === 'CordovaActivity') {
-        return Q.reject('Project name cannot be CordovaActivity');
-    }
-
-    //Classes in Java don't begin with numbers
-    if (/[0-9]+[a-zA-Z0-9]/.test(project_name)) {
-        return Q.reject('Project name must not begin with a number');
-    }
-
-    //Class is a reserved word
-    if(/[C|c]+lass+[\s|\.]/.test(package_name) && !/[a-zA-Z0-9_]+[C|c]+lass/.test(package_name))
-    {
-        return Q.reject('class is a reserved word');
-    }
-
-    // Check that requirements are met and proper targets are installed
-    return check_reqs.run()
+    //Make the package conform to Java package types
+    return validatePackageName(package_name)
     .then(function() {
+        validateProjectName(project_name);
+    })
+    // Check that requirements are met and proper targets are installed
+    .then(function() {
+        check_reqs.run();
+    }).then(function() {
         // Log the given values for the project
         console.log('Creating Cordova project for the amazon-fireos platform:');
         console.log('\tPath: ' + project_path);
@@ -262,20 +286,32 @@ function removeDebuggableFromManifest(projectPath) {
     shell.sed('-i', /\s*android:debuggable="true"/, '', manifestPath);
 }
 
+function extractProjectNameFromManifest(projectPath) {
+    var manifestPath = path.join(projectPath, 'AndroidManifest.xml');
+    var manifestData = fs.readFileSync(manifestPath, 'utf8');
+    var m = /<activity[\s\S]*?android:name\s*=\s*"(.*?)"/i.exec(manifestData);
+    if (!m) {
+      throw new Error('Could not find activity name in ' + manifestPath);
+    }
+    return m[1];
+}
+ 
 // Returns a promise.
 exports.updateProject = function(projectPath) {
     var version = fs.readFileSync(path.join(ROOT, 'VERSION'), 'utf-8').trim();
     // Check that requirements are met and proper targets are installed
     return check_reqs.run()
     .then(function() {
+        var projectName = extractProjectNameFromManifest(projectPath);
         var target_api = check_reqs.get_target();
-        copyJsAndLibrary(projectPath, false, null);
+        copyJsAndLibrary(projectPath, false, projectName);
         copyScripts(projectPath);
         copyAntRules(projectPath);
         removeDebuggableFromManifest(projectPath);
         return runAndroidUpdate(projectPath, target_api, false)
         .then(function() {
-            console.log('Android project is now at version ' + version);
+            console.log('amazon-fireos project is now at version ' + version);
+            console.log('If you updated from a pre-3.2.0 version and use an IDE, we now require that you import the "CordovaLib" library project.');
         });
     });
 };
