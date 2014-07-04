@@ -40,7 +40,6 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.res.Configuration;
 import android.graphics.Color;
 import android.media.AudioManager;
 import android.net.Uri;
@@ -55,7 +54,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.ImageView;
 import com.amazon.android.webkit.AmazonValueCallback;
 import com.amazon.android.webkit.AmazonWebViewClient;
 import com.amazon.android.webkit.AmazonWebKitFactory;
@@ -101,14 +99,8 @@ public class CordovaActivity extends Activity implements CordovaInterface {
     protected CordovaWebViewClient webViewClient;
 
     protected LinearLayout root;
-    protected boolean cancelLoadUrl = false;
     protected ProgressDialog spinnerDialog = null;
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
-
-
-    // The initial URL for our app
-    // ie http://server/path/index.html#abc?query
-    //private String url = null;
 
     private static int ACTIVITY_STARTING = 0;
     private static int ACTIVITY_RUNNING = 1;
@@ -139,14 +131,6 @@ public class CordovaActivity extends Activity implements CordovaInterface {
     // If true, then the JavaScript and native code continue to run in the background
     // when another application (activity) is started.
     protected boolean keepRunning = true;
-
-    private int lastRequestCode;
-
-    private Object responseCode;
-
-    private Intent lastIntent;
-
-    private Object lastResponseCode;
 
     private String initCallbackClass;
 
@@ -219,14 +203,12 @@ public class CordovaActivity extends Activity implements CordovaInterface {
 
     /**
      * Called when the activity is first created.
-     *
-     * @param savedInstanceState
      */
     @SuppressWarnings("deprecation")
     @Override
     public void onCreate(Bundle savedInstanceState) {
         Config.init(this);
-        LOG.i(TAG, "Apache Cordova native platform version " + appView.CORDOVA_VERSION + " is starting");
+        LOG.i(TAG, "Apache Cordova native platform version " + CordovaWebView.CORDOVA_VERSION + " is starting");
         LOG.d(TAG, "CordovaActivity.onCreate()");
         super.onCreate(savedInstanceState);
 
@@ -427,16 +409,10 @@ public class CordovaActivity extends Activity implements CordovaInterface {
         this.appView.setVisibility(View.INVISIBLE);
         this.root.addView(this.appView);
         setContentView(this.root);
-
-        // Clear cancel flag
-        this.cancelLoadUrl = false;
-        
     }
 
     /**
      * Load the url into the webview.
-     *
-     * @param url
      */
     public void loadUrl(String url) {
 
@@ -495,18 +471,6 @@ public class CordovaActivity extends Activity implements CordovaInterface {
 
         this.splashscreenTime = time;
         this.loadUrl(url);
-        
-        /*
-        // Init web view if not already done
-        if (this.appView == null) {
-            this.init();
-        }
-
-        this.splashscreenTime = time;
-        this.splashscreen = this.getIntegerProperty("SplashScreen", 0);
-        this.showSplashScreen(this.splashscreenTime);
-        this.appView.loadUrl(url, time);
-        */
     }
     
     /*
@@ -542,14 +506,8 @@ public class CordovaActivity extends Activity implements CordovaInterface {
         }
     }
 
-
-    /**
-     * Cancel loadUrl before it has been loaded.
-     */
-    // TODO NO-OP
     @Deprecated
     public void cancelLoadUrl() {
-        this.cancelLoadUrl = true;
     }
 
     /**
@@ -579,17 +537,6 @@ public class CordovaActivity extends Activity implements CordovaInterface {
             return appView.backHistory();
         }
         return false;
-    }
-
-    @Override
-    /**
-     * Called by the system when the device configuration changes while your activity is running.
-     *
-     * @param Configuration newConfig
-     */
-    public void onConfigurationChanged(Configuration newConfig) {
-        //don't reload the current page when the orientation is changed
-        super.onConfigurationChanged(newConfig);
     }
 
     /**
@@ -766,10 +713,10 @@ public class CordovaActivity extends Activity implements CordovaInterface {
 		return true;
 	}
     
-    @Override
     /**
      * Called when the system is about to start resuming a previous activity.
      */
+    @Override
     protected void onPause() {
         super.onPause();
 
@@ -792,10 +739,10 @@ public class CordovaActivity extends Activity implements CordovaInterface {
         this.removeSplashScreen();
     }
 
-    @Override
     /**
      * Called when the activity receives a new intent
      **/
+    @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         //Forward to plugins
@@ -803,10 +750,10 @@ public class CordovaActivity extends Activity implements CordovaInterface {
            this.appView.onNewIntent(intent);
     }
 
-    @Override
     /**
      * Called when the activity will start interacting with the user.
      */
+    @Override
     protected void onResume() {
         super.onResume();
         LOG.d(TAG, "Resuming the App");
@@ -835,10 +782,10 @@ public class CordovaActivity extends Activity implements CordovaInterface {
         }
     }
 
-    @Override
     /**
      * The final call you receive before your activity is destroyed.
      */
+    @Override
     public void onDestroy() {
         LOG.d(TAG, "CordovaActivity.onDestroy()");
         super.onDestroy();
@@ -856,9 +803,6 @@ public class CordovaActivity extends Activity implements CordovaInterface {
 
     /**
      * Send a message to all plugins.
-     *
-     * @param id            The message id
-     * @param data          The message data
      */
     public void postMessage(String id, Object data) {
         if (this.appView != null) {
@@ -871,9 +815,6 @@ public class CordovaActivity extends Activity implements CordovaInterface {
      * Add services to res/xml/plugins.xml instead.
      *
      * Add a class that implements a service.
-     *
-     * @param serviceType
-     * @param className
      */
     @Deprecated
     public void addService(String serviceType, String className) {
@@ -954,7 +895,6 @@ public class CordovaActivity extends Activity implements CordovaInterface {
         super.startActivityForResult(intent, requestCode);
     }
 
-    @Override
     /**
      * Called when an activity you launched exits, giving you the requestCode you started it with,
      * the resultCode it returned, and any additional data from it.
@@ -964,6 +904,7 @@ public class CordovaActivity extends Activity implements CordovaInterface {
      * @param resultCode        The integer result code returned by the child activity through its setResult().
      * @param data              An Intent, which can return result data to the caller (various data can be attached to Intent "extras").
      */
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         LOG.d(TAG, "Incoming Result");
         super.onActivityResult(requestCode, resultCode, intent);
@@ -975,8 +916,6 @@ public class CordovaActivity extends Activity implements CordovaInterface {
                 return;
             Uri result = intent == null || resultCode != Activity.RESULT_OK ? null : intent.getData();
             Log.d(TAG, "result = " + result);
-//            Uri filepath = Uri.parse("file://" + FileUtils.getRealPathFromURI(result, this));
-//            Log.d(TAG, "result = " + filepath);
             mUploadMessage.onReceiveValue(result);
             mUploadMessage = null;
         }
@@ -1037,11 +976,6 @@ public class CordovaActivity extends Activity implements CordovaInterface {
 
     /**
      * Display an error dialog and optionally exit application.
-     *
-     * @param title
-     * @param message
-     * @param button
-     * @param exit
      */
     public void displayError(final String title, final String message, final String button, final boolean exit) {
         final CordovaActivity me = this;
@@ -1072,9 +1006,6 @@ public class CordovaActivity extends Activity implements CordovaInterface {
 
     /**
      * Determine if URL is in approved list of URLs to load.
-     *
-     * @param url
-     * @return true if the url is whitelisted
      */
     public boolean isUrlWhiteListed(String url) {
         return Config.isUrlWhiteListed(url);
@@ -1082,7 +1013,6 @@ public class CordovaActivity extends Activity implements CordovaInterface {
 
     /*
      * Hook in Cordova for menu plugins
-     *
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -1104,9 +1034,6 @@ public class CordovaActivity extends Activity implements CordovaInterface {
 
     /**
      * Get Activity context.
-     *
-     * @return self
-     * @deprecated
      */
     @Deprecated
     public Context getContext() {
