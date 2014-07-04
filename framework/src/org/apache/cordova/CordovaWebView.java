@@ -49,7 +49,6 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import com.amazon.android.webkit.AmazonWebBackForwardList;
 import com.amazon.android.webkit.AmazonWebHistoryItem;
@@ -176,7 +175,6 @@ public class CordovaWebView extends AmazonWebView {
         {
             Log.d(TAG, "Your activity must implement CordovaInterface to work");
         }
-        this.loadConfiguration();
         this.setup();
     }
 
@@ -226,7 +224,6 @@ public class CordovaWebView extends AmazonWebView {
         }
         this.setWebChromeClient(new CordovaChromeClient(this.cordova, this));
         this.initWebViewClient(this.cordova);
-        this.loadConfiguration();
         this.setup();
     }
 
@@ -251,7 +248,6 @@ public class CordovaWebView extends AmazonWebView {
             Log.d(TAG, "Your activity must implement CordovaInterface to work");
         }
         this.setWebChromeClient(new CordovaChromeClient(this.cordova, this));
-        this.loadConfiguration();
         this.setup();
     }
 
@@ -279,7 +275,6 @@ public class CordovaWebView extends AmazonWebView {
         }
         this.setWebChromeClient(new CordovaChromeClient(this.cordova));
         this.initWebViewClient(this.cordova);
-        this.loadConfiguration();
         this.setup();
     }
 
@@ -715,21 +710,6 @@ public class CordovaWebView extends AmazonWebView {
             cordova.getActivity().startActivity(intent);
         } catch (android.content.ActivityNotFoundException e) {
             LOG.e(TAG, "Error loading url " + url, e);
-        }
-    }
-
-    /**
-     * Check configuration parameters from Config.
-     * Approved list of URLs that can be loaded into Cordova
-     *      <access origin="http://server regexp" subdomains="true" />
-     * Log level: ERROR, WARN, INFO, DEBUG, VERBOSE (default=ERROR)
-     *      <log level="DEBUG" />
-     */
-    private void loadConfiguration() {
- 
-        if ("true".equals(this.getProperty("Fullscreen", "false"))) {
-            this.cordova.getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
-            this.cordova.getActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         }
     }
 
