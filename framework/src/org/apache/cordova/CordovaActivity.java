@@ -62,7 +62,7 @@ import android.widget.LinearLayout;
 
 /**
  * This class is the main Android activity that represents the Cordova
- * application.  It should be extended by the user to load the specific
+ * application. It should be extended by the user to load the specific
  * html file that contains the application.
  *
  * As an example:
@@ -96,9 +96,13 @@ public class CordovaActivity extends Activity implements CordovaInterface {
 
     // The webview for our app
     protected CordovaWebView appView;
+
+    @Deprecated // unused.
     protected CordovaWebViewClient webViewClient;
 
+    @Deprecated // Will be removed. Use findViewById() to retrieve views.
     protected LinearLayout root;
+
     protected ProgressDialog spinnerDialog = null;
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
 
@@ -254,10 +258,8 @@ public class CordovaActivity extends Activity implements CordovaInterface {
 
     /**
      * Get the Android activity.
-     *
-     * @return the Activity
      */
-    public Activity getActivity() {
+    @Override public Activity getActivity() {
         return this;
     }
     
@@ -515,6 +517,7 @@ public class CordovaActivity extends Activity implements CordovaInterface {
     /**
      * Clear the resource cache.
      */
+    @Deprecated // Call method on appView directly.
     public void clearCache() {
         if (this.appView == null) {
             this.init();
@@ -525,6 +528,7 @@ public class CordovaActivity extends Activity implements CordovaInterface {
     /**
      * Clear web history in this web view.
      */
+    @Deprecated // Call method on appView directly.
     public void clearHistory() {
         this.appView.clearHistory();
     }
@@ -534,6 +538,7 @@ public class CordovaActivity extends Activity implements CordovaInterface {
      *
      * @return true if we went back, false if we are already at top
      */
+    @Deprecated // Call method on appView directly.
     public boolean backHistory() {
         if (this.appView != null) {
             return appView.backHistory();
@@ -829,6 +834,7 @@ public class CordovaActivity extends Activity implements CordovaInterface {
      *
      * @param statement
      */
+    @Deprecated // Call method on appView directly.
     public void sendJavascript(String statement) {
         if (this.appView != null) {
             this.appView.jsMessageQueue.addJavaScript(statement);
@@ -1051,6 +1057,7 @@ public class CordovaActivity extends Activity implements CordovaInterface {
      * @param clearHistory  Clear the history stack, so new page becomes top of history
      * @param params        Parameters for new app
      */
+    @Deprecated // Call method on appView directly.
     public void showWebPage(String url, boolean openExternal, boolean clearHistory, HashMap<String, Object> params) {
         if (this.appView != null) {
             appView.showWebPage(url, openExternal, clearHistory, params);
