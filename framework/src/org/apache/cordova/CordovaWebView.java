@@ -22,9 +22,12 @@ package org.apache.cordova;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import org.apache.cordova.Config;
 import org.apache.cordova.CordovaInterface;
@@ -158,24 +161,8 @@ public class CordovaWebView extends AmazonWebView {
             ViewGroup.LayoutParams.MATCH_PARENT,
             Gravity.CENTER);
     
-    /**
-     * Constructor.
-     *
-     * @param context
-     */
     public CordovaWebView(Context context) {
-        super(context);
-
-        if (CordovaInterface.class.isInstance(context))
-        {
-            this.cordova = (CordovaInterface) context;
-            this.cordova.getFactory().initializeWebView(this, 0xFFFFFF, false, null);
-        }
-        else
-        {
-            Log.d(TAG, "Your activity must implement CordovaInterface to work");
-        }
-        this.setup();
+        this(context, null);
     }
 
 ////fireos_change ////
@@ -188,7 +175,7 @@ public class CordovaWebView extends AmazonWebView {
      * @param extraData 
      */
     public CordovaWebView(Context context, Bundle extraData) {
-        super(context);
+        this(context, null);
  
         if (CordovaInterface.class.isInstance(context))
         {
@@ -212,95 +199,45 @@ public class CordovaWebView extends AmazonWebView {
      */
     public CordovaWebView(Context context, AttributeSet attrs) {
         super(context, attrs);
-
-        if (CordovaInterface.class.isInstance(context))
-        {
-            this.cordova = (CordovaInterface) context;
-            this.cordova.getFactory().initializeWebView(this, 0xFFFFFF, false, null);
-        }
-        else
-        {
-            Log.d(TAG, "Your activity must implement CordovaInterface to work");
-        }
-        this.setWebChromeClient(new CordovaChromeClient(this.cordova, this));
-        this.initWebViewClient(this.cordova);
-        this.setup();
     }
 
-    /**
-     * Constructor.
-     *
-     * @param context
-     * @param attrs
-     * @param defStyle
-     *
-     */
+    @Deprecated
     public CordovaWebView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-
-        if (CordovaInterface.class.isInstance(context))
-        {
-            this.cordova = (CordovaInterface) context;
-            this.cordova.getFactory().initializeWebView(this, 0xFFFFFF, false, null);
-        }
-        else
-        {
-            Log.d(TAG, "Your activity must implement CordovaInterface to work");
-        }
-        this.setWebChromeClient(new CordovaChromeClient(this.cordova, this));
-        this.setup();
     }
 
-    /**
-     * Constructor.
-     *
-     * @param context
-     * @param attrs
-     * @param defStyle
-     * @param privateBrowsing
-     */
     @TargetApi(11)
+    @Deprecated
     public CordovaWebView(Context context, AttributeSet attrs, int defStyle, boolean privateBrowsing) {
-        // super(context, attrs, defStyle, privateBrowsing); // DEPRECATED
-        super(context, attrs, defStyle);
-
-        if (CordovaInterface.class.isInstance(context))
-        {
-            this.cordova = (CordovaInterface) context;
-            this.cordova.getFactory().initializeWebView(this, 0xFFFFFF, privateBrowsing, null);
-        }
-        else
-        {
-            Log.d(TAG, "Your activity must implement CordovaInterface to work");
-        }
-        this.setWebChromeClient(new CordovaChromeClient(this.cordova));
-        this.initWebViewClient(this.cordova);
-        this.setup();
+        super(context, attrs, defStyle, privateBrowsing);
     }
 
-    /**
-     * set the WebViewClient, but provide special case handling for IceCreamSandwich.
-     */
-    private void initWebViewClient(CordovaInterface cordova) {
-        if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB ||
-                android.os.Build.VERSION.SDK_INT > android.os.Build.VERSION_CODES.JELLY_BEAN_MR1)
-        {
-            this.setWebViewClient(new CordovaWebViewClient(this.cordova, this));
+    // Use two-phase init so that the control will work with XML layouts.
+    public void init(CordovaInterface cordova, CordovaWebViewClient webViewClient, CordovaChromeClient chromeClient, List<PluginEntry> pluginEntries) {
+        if (this.cordova != null) {
+            throw new IllegalStateException();
         }
-        else
-        {
-            this.setWebViewClient(new IceCreamCordovaWebViewClient(this.cordova, this));
-        }
+        this.cordova = cordova;
+        this.viewClient = webViewClient;
+        this.chromeClient = chromeClient;
+        super.setWebChromeClient(chromeClient);
+        super.setWebViewClient(webViewClient);
+
+        pluginManager = new PluginManager(this, this.cordova, pluginEntries);
+        jsMessageQueue = new NativeToJsMessageQueue(this, cordova);
+        exposedJsApi = new ExposedJsApi(pluginManager, jsMessageQueue);
+        resourceApi = new CordovaResourceApi(this.getContext(), pluginManager);
+
+        initWebViewSettings();
+        exposeJsInterface();
     }
 
-    /**
-     * Initialize webview.
-     */
+    @SuppressLint("SetJavaScriptEnabled")
     @SuppressWarnings("deprecation")
-    @SuppressLint("NewApi")
-    private void setup() {
+    private void initWebViewSettings() {
         this.setInitialScale(0);
         this.setVerticalScrollBarEnabled(false);
+        // TODO: The Activity is the one that should call requestFocus().
         if (shouldRequestFocusOnInit()) {
 			this.requestFocusFromTouch();
 		}
@@ -339,7 +276,7 @@ public class CordovaWebView extends AmazonWebView {
         if (android.os.Build.VERSION.SDK_INT > android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1
             || (getWebViewBackend(this.cordova.getFactory()) == WebViewBackend.CHROMIUM))
             Level16Apis.enableUniversalAccess(settings);
-        
+
         if (getWebViewBackend(this.cordova.getFactory()) == WebViewBackend.ANDROID) {
         	File appCacheDir = this.cordova.getActivity().getDir(APPCACHE_DIR, Context.MODE_PRIVATE);
             if (appCacheDir.exists()) {
@@ -350,6 +287,13 @@ public class CordovaWebView extends AmazonWebView {
                 // shouldn't get here...
                 Log.e(TAG, "Unable to construct application cache directory, feature disabled");
             }
+        // Enable database
+        // We keep this disabled because we use or shim to get around DOM_EXCEPTION_ERROR_16
+        String databasePath = getContext().getApplicationContext().getDir("database", Context.MODE_PRIVATE).getPath();
+        settings.setDatabaseEnabled(true);
+        settings.setDatabasePath(databasePath);
+        
+        settings.setGeolocationDatabasePath(databasePath);
 
             File storageDir = this.cordova.getActivity().getDir(LOCAL_STORAGE_DIR, Context.MODE_PRIVATE);
             if (storageDir.exists()) {
@@ -385,9 +329,15 @@ public class CordovaWebView extends AmazonWebView {
         userAgent = userAgent.concat(" " + CORDOVA_AMAZON_FIREOS_UA); 
         settings.setUserAgentString(userAgent);
 
+        // Enable AppCache
+        // Fix for CB-2282
+        settings.setAppCacheMaxSize(5 * 1048576);
+        settings.setAppCachePath(databasePath);
+        settings.setAppCacheEnabled(true);
+        
         // Fix for CB-1405
         // Google issue 4641
-        this.updateUserAgentString();
+        settings.getUserAgentString();
         
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
@@ -395,12 +345,13 @@ public class CordovaWebView extends AmazonWebView {
             this.receiver = new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
-                    updateUserAgentString();
+                    getSettings().getUserAgentString();
                 }
             };
-            this.cordova.getActivity().registerReceiver(this.receiver, intentFilter);
+            getContext().registerReceiver(this.receiver, intentFilter);
         }
         // end CB-1405
+    }
 
         settings.setUseWideViewPort(true);
 
@@ -409,6 +360,26 @@ public class CordovaWebView extends AmazonWebView {
         exposedJsApi = new ExposedJsApi(pluginManager, jsMessageQueue);
         resourceApi = new CordovaResourceApi(this.getContext(), pluginManager);
         exposeJsInterface();
+
+    @TargetApi(Build.VERSION_CODES.KITKAT)
+    private void enableRemoteDebugging() {
+        try {
+            WebView.setWebContentsDebuggingEnabled(true);
+        } catch (IllegalArgumentException e) {
+            Log.d(TAG, "You have one job! To turn on Remote Web Debugging! YOU HAVE FAILED! ");
+            e.printStackTrace();
+        }
+    }
+
+    public CordovaChromeClient makeChromeClient(CordovaInterface cordova) {
+        return new CordovaChromeClient(cordova, this);
+    }
+
+    public CordovaWebViewClient makeWebViewClient(CordovaInterface cordova) {
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            return new CordovaWebViewClient(cordova, this);
+        }
+        return new IceCreamCordovaWebViewClient(cordova, this);
     }
     
     /**
@@ -439,13 +410,8 @@ public class CordovaWebView extends AmazonWebView {
 		return true;
 	}
 
-	private void updateUserAgentString() {
-        this.getSettings().getUserAgentString();
-    }
-
     private void exposeJsInterface() {
-        int SDK_INT = Build.VERSION.SDK_INT;
-        if ((SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1)) {
+        if ((Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1)) {
             Log.i(TAG, "Disabled addJavascriptInterface() bridge since Android version is old.");
             // Bug being that Java Strings do not get converted to JS strings automatically.
             // This isn't hard to work-around on the JS side, but it's easier to just
@@ -457,9 +423,8 @@ public class CordovaWebView extends AmazonWebView {
 
     /**
      * Set the WebViewClient.
-     *
-     * @param client
      */
+    @Deprecated // Set this in init() instead.
     public void setWebViewClient(CordovaWebViewClient client) {
         this.viewClient = client;
         super.setWebViewClient(client);
@@ -469,7 +434,9 @@ public class CordovaWebView extends AmazonWebView {
      * Set the AmazonWebChromeClient.
      *
      * @param client
+     * Set the WebChromeClient.
      */
+    @Deprecated // Set this in init() instead.
     public void setWebChromeClient(CordovaChromeClient client) {
         this.chromeClient = client;
         super.setWebChromeClient(client);
@@ -959,7 +926,7 @@ public class CordovaWebView extends AmazonWebView {
         // unregister the receiver
         if (this.receiver != null) {
             try {
-                this.cordova.getActivity().unregisterReceiver(this.receiver);
+                getContext().unregisterReceiver(this.receiver);
             } catch (Exception e) {
                 Log.e(TAG, "Error unregistering configuration receiver: " + e.getMessage(), e);
             }

@@ -22,7 +22,7 @@ package __ID__;
 import android.os.Bundle;
 import org.apache.cordova.*;
 
-public class __ACTIVITY__ extends CordovaActivity 
+public class __ACTIVITY__ extends CordovaActivity
 {
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -36,10 +36,10 @@ public class __ACTIVITY__ extends CordovaActivity
          */
         if (this.appView != null) {
             // Set by <content src="index.html" /> in config.xml
-            super.loadUrl(Config.getStartUrl());
-            //super.loadUrl("file:///android_asset/www/index.html");
+            loadUrl(launchUrl);
 
         }
+       
+
     }
 }
-
