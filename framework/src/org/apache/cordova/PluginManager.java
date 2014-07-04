@@ -87,12 +87,12 @@ public class PluginManager {
      * Load plugins from res/xml/config.xml
      */
     public void loadPlugins() {
-    	ConfigXmlParser parser = new ConfigXmlParser();
-    	parser.parse(ctx.getActivity());
-    	for (PluginEntry entry : parser.getPluginEntries()) {
-    		addService(entry);
-    	}
-    	urlMap = parser.getPluginUrlMap();
+        ConfigXmlParser parser = new ConfigXmlParser();
+        parser.parse(ctx.getActivity());
+        urlMap = new HashMap<String, List<String>>();
+        for (PluginEntry entry : parser.getPluginEntries()) {
+            addService(entry);
+        }
     }
 
     /**
@@ -248,6 +248,14 @@ public class PluginManager {
         }
         this.entries = tmpEntries;
     }
+    
+    public void addService(PluginEntry entry) {
+        this.entries.put(entry.service, entry);
+        List<String> urlFilters = entry.getUrlFilters();
+        if (urlFilters != null) {
+            urlMap.put(entry.service, urlFilters);
+        }
+    }
 
     /**
      * Called when the system is about to start resuming a previous activity.
@@ -352,11 +360,9 @@ public class PluginManager {
      * Called when the app navigates or refreshes.
      */
     public void onReset() {
-        Iterator<PluginEntry> it = this.entries.values().iterator();
-        while (it.hasNext()) {
-            CordovaPlugin plugin = it.next().plugin;
-            if (plugin != null) {
-                plugin.onReset();
+        for (PluginEntry entry : this.entries.values()) {
+            if (entry.plugin != null) {
+                entry.plugin.onReset();
             }
         }
     }

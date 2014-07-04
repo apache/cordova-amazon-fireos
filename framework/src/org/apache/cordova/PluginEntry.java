@@ -18,6 +18,8 @@
  */
 package org.apache.cordova;
 
+import java.util.List;
+
 import org.apache.cordova.CordovaWebView;
 import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.CordovaPlugin;
@@ -58,33 +60,42 @@ public class PluginEntry implements Comparable<PluginEntry> {
 	 * will take precedence over a higher value.
 	 */
 	public float priority = 0;
+    private List<String> urlFilters;
 
     /**
-     * Constructor
-     *
+     * @param service               The name of the service
+     * @param plugin                The plugin associated with this entry
+     */
+    public PluginEntry(String service, CordovaPlugin plugin) {
+        this(service, plugin.getClass().getName(), true, null);
+        this.plugin = plugin;
+    }
+
+    /**
      * @param service               The name of the service
      * @param pluginClass           The plugin class name
      * @param onload                Create plugin object when HTML page is loaded
      */
     public PluginEntry(String service, String pluginClass, boolean onload, float priority) {
+        this(service, pluginClass, onload, null);
+        this.priority = priority;
+    }
+    
+    public PluginEntry(String service, String pluginClass, boolean onload) {
+        this(service, pluginClass, onload, null);
+    }
+    
+
+    public PluginEntry(String service, String pluginClass, boolean onload, List<String> urlFilters) {
         this.service = service;
         this.pluginClass = pluginClass;
         this.onload = onload;
-        this.priority = priority;
+        this.urlFilters = urlFilters;
+        this.priority = 0;
     }
 
-    /**
-     * Alternate constructor
-     *
-     * @param service               The name of the service
-     * @param plugin                The plugin associated with this entry
-     */
-    public PluginEntry(String service, CordovaPlugin plugin) {
-        this.service = service;
-        this.plugin = plugin;
-        this.pluginClass = plugin.getClass().getName();
-        this.onload = false;
-        this.priority = 0;
+    public List<String> getUrlFilters() {
+        return urlFilters;
     }
 
     /**
@@ -98,8 +109,7 @@ public class PluginEntry implements Comparable<PluginEntry> {
             return this.plugin;
         }
         try {
-            @SuppressWarnings("rawtypes")
-            Class c = getClassByName(this.pluginClass);
+            Class<?> c = getClassByName(this.pluginClass);
             if (isCordovaPlugin(c)) {
                 this.plugin = (CordovaPlugin) c.newInstance();
                 this.plugin.initialize(ctx, webView);
@@ -119,9 +129,8 @@ public class PluginEntry implements Comparable<PluginEntry> {
      * @return a reference to the named class
      * @throws ClassNotFoundException
      */
-    @SuppressWarnings("rawtypes")
-    private Class getClassByName(final String clazz) throws ClassNotFoundException {
-        Class c = null;
+    private Class<?> getClassByName(final String clazz) throws ClassNotFoundException {
+        Class<?> c = null;
         if ((clazz != null) && !("".equals(clazz))) {
             c = Class.forName(clazz);
         }
@@ -131,10 +140,9 @@ public class PluginEntry implements Comparable<PluginEntry> {
     /**
      * Returns whether the given class extends CordovaPlugin.
      */
-    @SuppressWarnings("rawtypes")
-    private boolean isCordovaPlugin(Class c) {
+    private boolean isCordovaPlugin(Class<?> c) {
         if (c != null) {
-            return org.apache.cordova.CordovaPlugin.class.isAssignableFrom(c);
+            return CordovaPlugin.class.isAssignableFrom(c);
         }
         return false;
     }
