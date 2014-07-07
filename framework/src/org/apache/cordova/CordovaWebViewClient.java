@@ -127,7 +127,7 @@ public class CordovaWebViewClient extends AmazonWebViewClient {
      * @return              true to override, false for default behavior
      */
 	@Override
-    public boolean shouldOverrideUrlLoading(WebView view, String url) {
+    public boolean shouldOverrideUrlLoading(AmazonWebView view, String url) {
         return helper.shouldOverrideUrlLoading(view, url);
     }
     

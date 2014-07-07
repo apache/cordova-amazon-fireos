@@ -24,7 +24,7 @@ import org.json.JSONException;
 import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
-import android.webkit.WebView;
+import com.amazon.android.webkit.AmazonWebView;
 
 public class CordovaUriHelper {
     
@@ -69,7 +69,7 @@ public class CordovaUriHelper {
      * @param url           The url to be loaded.
      * @return              true to override, false for default behavior
      */
-    public boolean shouldOverrideUrlLoading(WebView view, String url) {
+    public boolean shouldOverrideUrlLoading(AmazonWebView view, String url) {
         // The WebView should support http and https when going on the Internet
         if(url.startsWith("http:") || url.startsWith("https:"))
         {

@@ -31,7 +31,6 @@ import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.LOG;
 import org.apache.cordova.PluginManager;
 import org.apache.cordova.PluginResult;
-
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.BroadcastReceiver;
@@ -754,6 +753,48 @@ public class CordovaWebView extends AmazonWebView {
         return p.toString();
     }
 
+    /**
+     * Handle when the back button is pressed on the current window. Depending on the state of the application, this
+     * will either navigate back in the history, close the window, send a back event to the running web application,
+     * or dismiss a full screen video.
+     */
+    public void onBackPressed() {
+        // A custom view is currently displayed (e.g. playing a video)
+        if (mCustomView != null) {
+            this.hideCustomView();
+        } else {
+            // The webview is currently displayed
+            // If back key is bound, then send event to JavaScript
+            if (isButtonPlumbedToJs(KeyEvent.KEYCODE_BACK)) {
+                this.loadUrl("javascript:cordova.fireDocumentEvent('backbutton');");
+                return;
+            } else {
+                // If not bound
+                // Give plugins a chance to override behavior
+                if (this.pluginManager != null) {
+                    Object returnVal = this.pluginManager.postMessage("onBackPressed", null);
+                    if (returnVal != null && returnVal instanceof Boolean && (Boolean) returnVal) {
+                        // The return value was a true boolean, callback was consumed
+                        return;
+                    }
+                }
+                // Go to previous page in webview if it is possible to go back
+                if (this.backHistory()) {
+                    return;
+                }
+                // If not, then invoke default behavior
+                else {
+                    // this.activityState = ACTIVITY_EXITING;
+                    // return false;
+                    // If they hit back button when app is initializing, app should exit instead of hang until
+                    // initialization (CB2-458)
+                    this.cordova.getActivity().finish();
+                }
+            }
+        }
+    }
+    
+    
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event)
     {
