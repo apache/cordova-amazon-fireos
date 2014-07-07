@@ -22,12 +22,10 @@ package org.apache.cordova;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import org.apache.cordova.Config;
 import org.apache.cordova.CordovaInterface;
@@ -41,8 +39,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -60,7 +56,6 @@ import com.amazon.android.webkit.AmazonWebKitFactories;
 import com.amazon.android.webkit.AmazonWebSettings;
 import com.amazon.android.webkit.AmazonWebView;
 import com.amazon.android.webkit.AmazonWebKitFactory;
-
 import android.widget.FrameLayout;
 
 public class CordovaWebView extends AmazonWebView {
@@ -213,14 +208,14 @@ public class CordovaWebView extends AmazonWebView {
     }
 
     // Use two-phase init so that the control will work with XML layouts.
-    public void init(CordovaInterface cordova, CordovaWebViewClient webViewClient, CordovaChromeClient chromeClient, List<PluginEntry> pluginEntries) {
+    public void init(CordovaInterface cordova, CordovaWebViewClient webViewClient, CordovaChromeClient webChromeClient, List<PluginEntry> pluginEntries) {
         if (this.cordova != null) {
             throw new IllegalStateException();
         }
         this.cordova = cordova;
         this.viewClient = webViewClient;
-        this.chromeClient = chromeClient;
-        super.setWebChromeClient(chromeClient);
+        this.chromeClient = webChromeClient;
+        super.setWebChromeClient(webChromeClient);
         super.setWebViewClient(webViewClient);
 
         pluginManager = new PluginManager(this, this.cordova, pluginEntries);
@@ -371,7 +366,7 @@ public class CordovaWebView extends AmazonWebView {
         }
     }
 
-    public CordovaChromeClient makeChromeClient(CordovaInterface cordova) {
+    public CordovaChromeClient makeWebChromeClient(CordovaInterface cordova) {
         return new CordovaChromeClient(cordova, this);
     }
 
@@ -421,24 +416,15 @@ public class CordovaWebView extends AmazonWebView {
         this.addJavascriptInterface(exposedJsApi, "_cordovaNative");
     }
 
-    /**
-     * Set the WebViewClient.
-     */
-    @Deprecated // Set this in init() instead.
-    public void setWebViewClient(CordovaWebViewClient client) {
-        this.viewClient = client;
+    @Override
+    public void setWebViewClient(WebViewClient client) {
+        this.viewClient = (CordovaWebViewClient)client;
         super.setWebViewClient(client);
     }
 
-    /**
-     * Set the AmazonWebChromeClient.
-     *
-     * @param client
-     * Set the WebChromeClient.
-     */
-    @Deprecated // Set this in init() instead.
-    public void setWebChromeClient(CordovaChromeClient client) {
-        this.chromeClient = client;
+    @Override
+    public void setWebChromeClient(AmazonWebChromeClient client) {
+        this.chromeClient = (CordovaChromeClient)client;
         super.setWebChromeClient(client);
     }
     
