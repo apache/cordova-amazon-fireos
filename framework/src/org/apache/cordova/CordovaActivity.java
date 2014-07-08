@@ -243,7 +243,7 @@ public class CordovaActivity extends Activity implements CordovaInterface {
         }
 
         appView = makeWebView();
-        appView.init(this, makeWebViewClient(appView), makeChromeClient(appView), pluginEntries, whitelist);
+        appView.init(this, makeWebViewClient(appView), makeChromeClient(appView), pluginEntries, whitelist, preferences);
 
         // TODO: Have the views set this themselves.
         if (preferences.getBoolean("DisallowOverscroll", false)) {
@@ -256,6 +256,7 @@ public class CordovaActivity extends Activity implements CordovaInterface {
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
     }
 
+    @SuppressWarnings("deprecation")
     protected void loadConfig() {
         ConfigXmlParser parser = new ConfigXmlParser();
         parser.parse(this);
