@@ -223,6 +223,7 @@ public class CordovaWebView extends AmazonWebView {
         exposedJsApi = new ExposedJsApi(pluginManager, jsMessageQueue);
         resourceApi = new CordovaResourceApi(this.getContext(), pluginManager);
 
+        pluginManager.addService("App", "org.apache.cordova.App");
         initWebViewSettings();
         exposeJsInterface();
     }
