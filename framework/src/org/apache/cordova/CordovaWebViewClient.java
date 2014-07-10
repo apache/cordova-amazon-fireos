@@ -142,8 +142,7 @@ public class CordovaWebViewClient extends AmazonWebViewClient {
         isCurrentlyLoading = true;
         LOG.d(TAG, "onPageStarted(" + url + ")");
         // Flush stale messages.
-        this.appView.jsMessageQueue.reset();
-        this.appView.exposedJsApi.clearBridgeSecret();
+        this.appView.bridge.reset(url);
 
         // Broadcast message that page has loaded
         this.appView.postMessage("onPageStarted", url);
