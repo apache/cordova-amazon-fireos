@@ -21,10 +21,9 @@ package org.apache.cordova.test;
 import android.os.Bundle;
 import com.amazon.android.webkit.AmazonGeolocationPermissions.Callback;
 import org.apache.cordova.*;
-
 import com.amazon.android.webkit.AmazonWebView;
 
-public class userwebview extends DroidGap {
+public class userwebview extends MainTestActivity {
     
     public TestViewClient testViewClient;
     public TestChromeClient testChromeClient;
@@ -32,15 +31,17 @@ public class userwebview extends DroidGap {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        testViewClient = new TestViewClient(this);
-        testChromeClient = new TestChromeClient(this);
-        super.init(new CordovaWebView(this), new TestViewClient(this), new TestChromeClient(this));
+        testViewClient = new TestViewClient(this, appView);
+        testChromeClient = new TestChromeClient(this, appView);
+        super.init();
+        appView.setWebViewClient(testViewClient);
+        appView.setWebChromeClient(testChromeClient);
         super.loadUrl("file:///android_asset/www/userwebview/index.html");
     }
 
     public class TestChromeClient extends CordovaChromeClient {
-        public TestChromeClient(DroidGap arg0) {
-            super(arg0);
+        public TestChromeClient(CordovaInterface ctx, CordovaWebView app) {
+            super(ctx, app);
             LOG.d("userwebview", "TestChromeClient()");
         }
 
@@ -55,8 +56,8 @@ public class userwebview extends DroidGap {
      * This class can be used to override the GapViewClient and receive notification of webview events.
      */
     public class TestViewClient extends CordovaWebViewClient {
-        public TestViewClient(DroidGap arg0) {
-            super(arg0);
+        public TestViewClient(CordovaInterface ctx, CordovaWebView app) {
+            super(ctx, app);
             LOG.d("userwebview", "TestViewClient()");
         }
         

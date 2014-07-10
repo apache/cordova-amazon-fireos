@@ -86,9 +86,7 @@ public class BackButtonMultiPageTest extends
           {
               String url = testView.getUrl();
               assertEquals("file:///android_asset/www/backbuttonmultipage/sample3.html", url);
-              testView.printBackForwardList();
               assertTrue(testView.backHistory());
-              testView.printBackForwardList();
           }
       });
       sleep();
