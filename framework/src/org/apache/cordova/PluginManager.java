@@ -86,6 +86,7 @@ public class PluginManager {
     /**
      * Init when loading a new HTML page into webview.
      */
+    @Deprecated // Should not be exposed as public.
     public void init() {
         LOG.d(TAG, "init()");
         this.onPause(false);
@@ -101,6 +102,7 @@ public class PluginManager {
     /**
      * Delete all plugin objects.
      */
+    @Deprecated // Should not be exposed as public.
     public void clearPluginObjects() {
         pluginMap.clear();
     }
@@ -108,6 +110,7 @@ public class PluginManager {
     /**
      * Create plugins objects that have onload set.
      */
+    @Deprecated // Should not be exposed as public.
     public void startupPlugins() {
         for (PluginEntry entry : entryMap.values()) {
             if (entry.onload) {
@@ -274,6 +277,7 @@ public class PluginManager {
      *
      * @param multitasking      Flag indicating if multitasking is turned on for app
      */
+    @Deprecated // Should not be public
     public void onPause(boolean multitasking) {
         for (CordovaPlugin plugin : this.pluginMap.values()) {
             plugin.onPause(multitasking);
@@ -285,6 +289,7 @@ public class PluginManager {
      *
      * @param multitasking      Flag indicating if multitasking is turned on for app
      */
+    @Deprecated // Should not be public
     public void onResume(boolean multitasking) {
         for (CordovaPlugin plugin : this.pluginMap.values()) {
             plugin.onResume(multitasking);
@@ -294,6 +299,7 @@ public class PluginManager {
     /**
      * The final call you receive before your activity is destroyed.
      */
+    @Deprecated // Should not be public
     public void onDestroy() {
         for (CordovaPlugin plugin : this.pluginMap.values()) {
             plugin.onDestroy();
@@ -324,6 +330,7 @@ public class PluginManager {
     /**
      * Called when the activity receives a new intent.
      */
+    @Deprecated // Should not be public
     public void onNewIntent(Intent intent) {
         for (CordovaPlugin plugin : this.pluginMap.values()) {
             plugin.onNewIntent(intent);
@@ -336,6 +343,7 @@ public class PluginManager {
      * @param url               The URL that is being changed to.
      * @return                  Return false to allow the URL to load, return true to prevent the URL from loading.
      */
+    @Deprecated // Should not be public
     public boolean onOverrideUrlLoading(String url) {
         // Deprecated way to intercept URLs. (process <url-filter> tags).
         // Instead, plugins should not include <url-filter> and instead ensure
@@ -362,6 +370,7 @@ public class PluginManager {
     /**
      * Called when the app navigates or refreshes.
      */
+    @Deprecated // Should not be public
     public void onReset() {
         for (CordovaPlugin plugin : this.pluginMap.values()) {
             plugin.onReset();
