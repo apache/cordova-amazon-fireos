@@ -144,7 +144,8 @@ public class CordovaActivity extends Activity implements CordovaInterface {
     private static final String ERROR_DIALOG_OK_BUTTON = "OK";
     // Read from config.xml:
     protected CordovaPreferences preferences;
-    protected Whitelist whitelist;
+    protected Whitelist internalWhitelist;
+    protected Whitelist externalWhitelist;
     protected String launchUrl;
     protected ArrayList<PluginEntry> pluginEntries;
 
@@ -232,7 +233,8 @@ public class CordovaActivity extends Activity implements CordovaInterface {
         preferences = parser.getPreferences();
         preferences.setPreferencesBundle(getIntent().getExtras());
         preferences.copyIntoIntentExtras(this);
-        whitelist = parser.getWhitelist();
+        internalWhitelist = parser.getInternalWhitelist();
+        externalWhitelist = parser.getExternalWhitelist();
         launchUrl = parser.getLaunchUrl();
         pluginEntries = parser.getPluginEntries();
         Config.parser = parser;
@@ -415,7 +417,7 @@ public class CordovaActivity extends Activity implements CordovaInterface {
         if (appView.pluginManager == null) {
             appView.init(this, webViewClient != null ? webViewClient : makeWebViewClient(appView),
                     webChromeClient != null ? webChromeClient : makeChromeClient(appView),
-                    pluginEntries, whitelist, preferences);
+                    pluginEntries, internalWhitelist, externalWhitelist, preferences);
         }
 
         // TODO: Have the views set this themselves.
@@ -902,7 +904,7 @@ public class CordovaActivity extends Activity implements CordovaInterface {
 
         // If errorUrl specified, then load it
         final String errorUrl = preferences.getString("errorUrl", null);
-        if ((errorUrl != null) && (errorUrl.startsWith("file://") || whitelist.isUrlWhiteListed(errorUrl)) && (!failingUrl.equals(errorUrl))) {
+        if ((errorUrl != null) && (errorUrl.startsWith("file://") || internalWhitelist.isUrlWhiteListed(errorUrl)) && (!failingUrl.equals(errorUrl))) {
 
             // Load URL on UI thread
             me.runOnUiThread(new Runnable() {
@@ -962,7 +964,7 @@ public class CordovaActivity extends Activity implements CordovaInterface {
      */
     @Deprecated // Use whitelist object directly.
     public boolean isUrlWhiteListed(String url) {
-        return whitelist.isUrlWhiteListed(url);
+        return internalWhitelist.isUrlWhiteListed(url);
     }
 
     /*
