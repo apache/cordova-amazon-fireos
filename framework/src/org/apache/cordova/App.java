@@ -33,6 +33,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.telephony.TelephonyManager;
 import android.view.KeyEvent;
+import android.util.Log;
 
 import java.util.HashMap;
 
@@ -131,7 +132,7 @@ public class App extends CordovaPlugin {
      * @throws JSONException
      */
     public void loadUrl(String url, JSONObject props) throws JSONException {
-        LOG.d("App", "App.loadUrl("+url+","+props+")");
+        Log.d(TAG, "App.loadUrl("+url+","+props+")");
         int wait = 0;
         boolean openExternal = false;
         boolean clearHistory = false;
@@ -213,7 +214,7 @@ public class App extends CordovaPlugin {
      * @param override		T=override, F=cancel override
      */
     public void overrideBackbutton(boolean override) {
-        LOG.i("App", "WARNING: Back Button Default Behavior will be overridden.  The backbutton event will be fired!");
+        Log.i("App", "WARNING: Back Button Default Behavior will be overridden.  The backbutton event will be fired!");
         webView.setButtonPlumbedToJs(KeyEvent.KEYCODE_BACK, override);
     }
 
@@ -225,7 +226,7 @@ public class App extends CordovaPlugin {
      * @param override      T=override, F=cancel override
      */
     public void overrideButton(String button, boolean override) {
-        LOG.i("App", "WARNING: Volume Button Default Behavior will be overridden.  The volume event will be fired!");
+        Log.i(TAG, "WARNING: Volume Button Default Behavior will be overridden.  The volume event will be fired!");
         if (button.equals("volumeup")) {
             webView.setButtonPlumbedToJs(KeyEvent.KEYCODE_VOLUME_UP, override);
         }
@@ -270,15 +271,15 @@ public class App extends CordovaPlugin {
                     if (intent.hasExtra(TelephonyManager.EXTRA_STATE)) {
                         String extraData = intent.getStringExtra(TelephonyManager.EXTRA_STATE);
                         if (extraData.equals(TelephonyManager.EXTRA_STATE_RINGING)) {
-                            LOG.i(TAG, "Telephone RINGING");
+                            Log.i(TAG, "Telephone RINGING");
                             webView.postMessage("telephone", "ringing");
                         }
                         else if (extraData.equals(TelephonyManager.EXTRA_STATE_OFFHOOK)) {
-                            LOG.i(TAG, "Telephone OFFHOOK");
+                            Log.i(TAG, "Telephone OFFHOOK");
                             webView.postMessage("telephone", "offhook");
                         }
                         else if (extraData.equals(TelephonyManager.EXTRA_STATE_IDLE)) {
-                            LOG.i(TAG, "Telephone IDLE");
+                            Log.i(TAG, "Telephone IDLE");
                             webView.postMessage("telephone", "idle");
                         }
                     }
@@ -296,6 +297,9 @@ public class App extends CordovaPlugin {
      */
     public void onDestroy()
     {
-        this.cordova.getActivity().unregisterReceiver(this.telephonyReceiver);
+        if (this.telephonyReceiver != null) {
+            this.cordova.getActivity().unregisterReceiver(this.telephonyReceiver);
+            this.telephonyReceiver = null;
+        }
     }
 }

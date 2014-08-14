@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 
-import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.CordovaWebView;
 import org.apache.cordova.PluginEntry;
 import org.apache.cordova.PluginManager;
@@ -50,12 +49,9 @@ public class PluginManagerTest extends ActivityInstrumentationTestCase2<CordovaW
     private static final String PLUGIN4_CLASS = PLUGIN_PACKAGE + PLUGIN4_SERVICE;
     private static final String PLUGIN5_SERVICE = "Plugin5";
     private static final String PLUGIN5_CLASS = PLUGIN_PACKAGE + PLUGIN5_SERVICE;
-    private static final String TAG = "PluginManagerTest";
     private static final String TEST_URL = "file:///android_asset/www/plugins/%s.html";
     private static final String PLUGIN1_URL = String.format(TEST_URL, PLUGIN1_SERVICE);
-    private static final String PLUGIN2_URL = String.format(TEST_URL, PLUGIN2_SERVICE);
     private static final String PLUGIN3_URL = String.format(TEST_URL, PLUGIN3_SERVICE);
-    private static final String PLUGIN4_URL = String.format(TEST_URL, PLUGIN4_SERVICE);
     private static final String PLUGIN5_URL = String.format(TEST_URL, PLUGIN5_SERVICE);
 
     private CordovaWebViewTestActivity testActivity;
@@ -65,8 +61,6 @@ public class PluginManagerTest extends ActivityInstrumentationTestCase2<CordovaW
     private PluginManager pluginMgr;
     private CordovaWebView mWebView;
 
-    private CordovaInterface cordova;
-    private PluginManager testPluginManager;
 
     public PluginManagerTest() {
         super("org.apache.cordova.test.activities", CordovaWebViewTestActivity.class);
@@ -167,8 +161,9 @@ public class PluginManagerTest extends ActivityInstrumentationTestCase2<CordovaW
         addTestPlugin(PLUGIN2_SERVICE, PLUGIN2_CLASS, true, -99f);
         addTestPlugin(PLUGIN3_SERVICE, PLUGIN3_CLASS, true, -98f);
         
-        Field entries = pluginMgr.getClass().getDeclaredField("entries");
+        Field entries = pluginMgr.getClass().getDeclaredField("entryMap");
         entries.setAccessible(true);
+        @SuppressWarnings("unchecked")
         LinkedHashMap<String, PluginEntry> testEntries = (LinkedHashMap<String, PluginEntry>) entries.get(pluginMgr);
         List<PluginEntry> pluginList = new ArrayList<PluginEntry>();
         for (PluginEntry entry : testEntries.values())
@@ -193,8 +188,8 @@ public class PluginManagerTest extends ActivityInstrumentationTestCase2<CordovaW
      */
     private void addTestPlugin(String service, String cls, boolean onload, final float priority) {
         PluginEntry pEntry = new PluginEntry(service, cls, onload, priority);
-        pEntry.createPlugin(mWebView, testActivity);
         pluginMgr.addService(pEntry);
+        pluginMgr.getPlugin(service);
     }
 
     /**

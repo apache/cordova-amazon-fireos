@@ -62,7 +62,7 @@ public class CordovaWebView extends AmazonWebView {
 
 
     public static final String TAG = "CordovaWebView";
-    public static final String CORDOVA_VERSION = "3.4.0-dev";
+    public static final String CORDOVA_VERSION = "3.6.0-dev";
 
     private HashSet<Integer> boundKeyCodes = new HashSet<Integer>();
 
@@ -149,7 +149,7 @@ public class CordovaWebView extends AmazonWebView {
             Gravity.CENTER);
     
     public CordovaWebView(Context context) {
-        this(context, null);
+        this(context, (AttributeSet)null);
     }
 
 ////fireos_change ////
@@ -162,7 +162,7 @@ public class CordovaWebView extends AmazonWebView {
      * @param extraData 
      */
     public CordovaWebView(Context context, Bundle extraData) {
-        this(context, null);
+        this(context, (AttributeSet)null);
  
         if (CordovaInterface.class.isInstance(context))
         {
@@ -173,8 +173,6 @@ public class CordovaWebView extends AmazonWebView {
         {
             Log.d(TAG, "Your activity must implement CordovaInterface to work");
         }
-        this.loadConfiguration();
-        this.setup();
     }
 ////fireos_change ////
     
@@ -192,13 +190,13 @@ public class CordovaWebView extends AmazonWebView {
     public CordovaWebView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
     }
-
+/*
     @TargetApi(11)
     @Deprecated
     public CordovaWebView(Context context, AttributeSet attrs, int defStyle, boolean privateBrowsing) {
         super(context, attrs, defStyle, privateBrowsing);
     }
-
+*/
     // Use two-phase init so that the control will work with XML layouts.
     public void init(CordovaInterface cordova, CordovaWebViewClient webViewClient, CordovaChromeClient webChromeClient,
             List<PluginEntry> pluginEntries, Whitelist whitelist, CordovaPreferences preferences) {
@@ -206,6 +204,7 @@ public class CordovaWebView extends AmazonWebView {
             throw new IllegalStateException();
         }
         this.cordova = cordova;
+        //this.cordova.getFactory().initializeWebView(this, 0xFFFFFF, false, null);
         this.viewClient = webViewClient;
         this.chromeClient = webChromeClient;
         this.whitelist = whitelist;
@@ -279,7 +278,8 @@ public class CordovaWebView extends AmazonWebView {
         if (android.os.Build.VERSION.SDK_INT > android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1
             || (getWebViewBackend(this.cordova.getFactory()) == WebViewBackend.CHROMIUM))
             Level16Apis.enableUniversalAccess(settings);
-
+        String databasePath = getContext().getApplicationContext().getDir("database", Context.MODE_PRIVATE).getPath();
+        
         if (getWebViewBackend(this.cordova.getFactory()) == WebViewBackend.ANDROID) {
         	File appCacheDir = this.cordova.getActivity().getDir(APPCACHE_DIR, Context.MODE_PRIVATE);
             if (appCacheDir.exists()) {
@@ -292,7 +292,6 @@ public class CordovaWebView extends AmazonWebView {
             }
         // Enable database
         // We keep this disabled because we use or shim to get around DOM_EXCEPTION_ERROR_16
-        String databasePath = getContext().getApplicationContext().getDir("database", Context.MODE_PRIVATE).getPath();
         settings.setDatabaseEnabled(true);
         settings.setDatabasePath(databasePath);
         
@@ -331,12 +330,15 @@ public class CordovaWebView extends AmazonWebView {
         }
         userAgent = userAgent.concat(" " + CORDOVA_AMAZON_FIREOS_UA); 
         settings.setUserAgentString(userAgent);
-
+        //__FireOS__
+        settings.setUseWideViewPort(true);
+        //__FireOS__
+        
         // Enable AppCache
         // Fix for CB-2282
-        settings.setAppCacheMaxSize(5 * 1048576);
-        settings.setAppCachePath(databasePath);
-        settings.setAppCacheEnabled(true);
+        //settings.setAppCacheMaxSize(5 * 1048576);
+        //settings.setAppCachePath(databasePath);
+        //settings.setAppCacheEnabled(true);
         
         // Fix for CB-1405
         // Google issue 4641
@@ -355,25 +357,17 @@ public class CordovaWebView extends AmazonWebView {
         }
         // end CB-1405
     }
-
-        settings.setUseWideViewPort(true);
-
-        pluginManager = new PluginManager(this, this.cordova);
-        jsMessageQueue = new NativeToJsMessageQueue(this, cordova);
-        exposedJsApi = new ExposedJsApi(pluginManager, jsMessageQueue);
-        resourceApi = new CordovaResourceApi(this.getContext(), pluginManager);
-        exposeJsInterface();
-
+/*
     @TargetApi(Build.VERSION_CODES.KITKAT)
     private void enableRemoteDebugging() {
         try {
-            WebView.setWebContentsDebuggingEnabled(true);
+            AmazonWebView.setWebContentsDebuggingEnabled(true);
         } catch (IllegalArgumentException e) {
             Log.d(TAG, "You have one job! To turn on Remote Web Debugging! YOU HAVE FAILED! ");
             e.printStackTrace();
         }
     }
-
+*/
     public CordovaChromeClient makeWebChromeClient(CordovaInterface cordova) {
         return new CordovaChromeClient(cordova, this);
     }
@@ -422,12 +416,6 @@ public class CordovaWebView extends AmazonWebView {
             return;            
         } 
         this.addJavascriptInterface(new ExposedJsApi(bridge), "_cordovaNative");
-    }
-
-    @Override
-    public void setWebViewClient(WebViewClient client) {
-        this.viewClient = (CordovaWebViewClient)client;
-        super.setWebViewClient(client);
     }
 
     @Override

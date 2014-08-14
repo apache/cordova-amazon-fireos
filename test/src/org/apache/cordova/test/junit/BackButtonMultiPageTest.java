@@ -21,11 +21,13 @@ package org.apache.cordova.test.junit;
  *
  */
 
+import org.apache.cordova.Config;
+import org.apache.cordova.CordovaChromeClient;
 import org.apache.cordova.CordovaWebView;
+import org.apache.cordova.CordovaWebViewClient;
 import org.apache.cordova.test.backbuttonmultipage;
 
 import android.test.ActivityInstrumentationTestCase2;
-import android.util.Log;
 import android.test.UiThreadTest;
 import android.view.KeyEvent;
 import android.view.inputmethod.BaseInputConnection;
@@ -207,7 +209,7 @@ public class BackButtonMultiPageTest extends
       });
       
   }
-  
+
   public void testViaBackButtonOnLayout() throws Throwable {
       runTestOnUiThread(new Runnable() {
           public void run()

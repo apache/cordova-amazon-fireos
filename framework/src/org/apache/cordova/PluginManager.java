@@ -22,6 +22,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
 
 import org.apache.cordova.CordovaWebView;
 import org.apache.cordova.CallbackContext;
@@ -30,6 +32,7 @@ import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.PluginEntry;
 import org.apache.cordova.PluginResult;
 import org.json.JSONException;
+
 
 import android.content.Intent;
 import android.net.Uri;
@@ -47,8 +50,8 @@ public class PluginManager {
     private static final int SLOW_EXEC_WARNING_THRESHOLD = Debug.isDebuggerConnected() ? 60 : 16;
 
     // List of service entries
-    private final HashMap<String, CordovaPlugin> pluginMap = new HashMap<String, CordovaPlugin>();
-    private final HashMap<String, PluginEntry> entryMap = new LinkedHashMap<String, PluginEntry>();
+    private HashMap<String, CordovaPlugin> pluginMap = new LinkedHashMap<String, CordovaPlugin>();
+    private HashMap<String, PluginEntry> entryMap = new LinkedHashMap<String, PluginEntry>();
 
     private final CordovaInterface ctx;
     private final CordovaWebView app;
@@ -90,7 +93,7 @@ public class PluginManager {
         LOG.d(TAG, "init()");
         this.onPause(false);
         this.onDestroy();
-        pluginMap.clear();
+        //pluginMap.clear();
         this.startupPlugins();
     }
 
@@ -179,6 +182,7 @@ public class PluginManager {
      * @return              CordovaPlugin or null
      */
     public CordovaPlugin getPlugin(String service) {
+        Log.d(TAG, "in getPlugin for service - " + service);
         CordovaPlugin ret = pluginMap.get(service);
         if (ret == null) {
             PluginEntry pe = entryMap.get(service);
@@ -188,10 +192,24 @@ public class PluginManager {
             if (pe.plugin != null) {
                 ret = pe.plugin;
             } else {
-                ret = instantiatePlugin(pe.pluginClass);
+                ret = instantiatePlugin(pe.pluginClass);   
             }
             ret.privateInitialize(ctx, app, app.getPreferences());
-            pluginMap.put(service, ret);
+            HashMap<String, CordovaPlugin> tmpPlugins = new LinkedHashMap<String, CordovaPlugin>();
+            List<PluginEntry> pluginEntries = new ArrayList<PluginEntry>(entryMap.values());
+            for (PluginEntry pluginEntry : pluginEntries) {
+                if (pluginEntry.plugin != null) {
+                    tmpPlugins.put(pluginEntry.service, pluginEntry.plugin);
+                } else {
+                    CordovaPlugin plugin = pluginMap.get(pluginEntry.service);
+                    if (plugin != null) {
+                        tmpPlugins.put(pluginEntry.service, plugin);
+                    } else if (pluginEntry.service.equals(service)) {
+                        tmpPlugins.put(service, ret);
+                    }
+                }
+            }
+            this.pluginMap = tmpPlugins;
         }
         return ret;
     }
@@ -232,11 +250,21 @@ public class PluginManager {
 		 */
 
 		// create list from existing set of plugin entries, then add new item to list
-		List<PluginEntry> pluginEntries = new ArrayList<PluginEntry>(entries.values());
+		List<PluginEntry> pluginEntries = new ArrayList<PluginEntry>(entryMap.values());
 		pluginEntries.add(entry);
 
+        //Update PluginMap as well
+        if (entry.plugin != null) {
+            entry.plugin.privateInitialize(ctx, app, app.getPreferences());
+            pluginMap.put(entry.service, entry.plugin);
+        }
 		// recreate final set entries in priority order
 		this.addServices(pluginEntries);
+        
+        List<String> urlFilters = entry.getUrlFilters();
+        if (urlFilters != null) {
+            urlMap.put(entry.service, urlFilters);
+        }
 	}
 
     /**
@@ -251,26 +279,27 @@ public class PluginManager {
         Collections.sort(services);
 
         // create a new map from the prioritized list, and use it as the primary set of entries
+        // update pluginMap as well
+        
+        HashMap<String, CordovaPlugin> tmpPlugins = new LinkedHashMap<String, CordovaPlugin>();
         HashMap<String, PluginEntry> tmpEntries = new LinkedHashMap<String, PluginEntry>();
         for (PluginEntry pluginEntry : services) {
             tmpEntries.put(pluginEntry.service, pluginEntry);
+            if (pluginEntry.plugin != null) {
+                tmpPlugins.put(pluginEntry.service, pluginEntry.plugin);
+            } else {
+                CordovaPlugin plugin = pluginMap.get(pluginEntry.service);
+                if (plugin != null) {
+                    tmpPlugins.put(pluginEntry.service, plugin);
+                }
+            }
         }
-        this.entries = tmpEntries;
+        
+        this.entryMap = tmpEntries;
+        this.pluginMap = tmpPlugins;
+        
     }
     
-    public void addService(PluginEntry entry) {
-        this.entryMap.put(entry.service, entry);
-        List<String> urlFilters = entry.getUrlFilters();
-        if (urlFilters != null) {
-            urlMap.put(entry.service, urlFilters);
-        }
-        if (entry.plugin != null) {
-            entry.plugin.privateInitialize(ctx, app, app.getPreferences());
-            pluginMap.put(entry.service, entry.plugin);
-        }
-
-    }
-
     /**
      * Called when the system is about to start resuming a previous activity.
      *
@@ -297,9 +326,15 @@ public class PluginManager {
      * The final call you receive before your activity is destroyed.
      */
     public void onDestroy() {
-        for (CordovaPlugin plugin : this.pluginMap.values()) {
-            plugin.onDestroy();
+        try {
+            for (CordovaPlugin plugin : this.pluginMap.values()) {
+                Log.d(TAG, "In destroy");
+                plugin.onDestroy();
+            }
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage());
         }
+
     }
 
     /**
@@ -314,6 +349,7 @@ public class PluginManager {
         if (obj != null) {
             return obj;
         }
+
         for (CordovaPlugin plugin : this.pluginMap.values()) {
             obj = plugin.onMessage(id, data);
             if (obj != null) {
@@ -348,6 +384,7 @@ public class PluginManager {
             if (urlFilters != null) {
                 for (String s : urlFilters) {
                     if (url.startsWith(s)) {
+                        Log.d(TAG,"onOverrideUrlLoading()");
                         return getPlugin(entry.service).onOverrideUrlLoading(url);
                     }
                 }

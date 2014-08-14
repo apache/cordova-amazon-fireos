@@ -45,7 +45,7 @@ public class CordovaWebViewTestActivity extends Activity implements CordovaInter
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
     private static boolean sFactoryInit = false;
     private AmazonWebKitFactory factory = null;
-    
+      
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -57,7 +57,7 @@ public class CordovaWebViewTestActivity extends Activity implements CordovaInter
            if (factory.isRenderProcess(this)) {
                return; // Do nothing if this is on render process
            }
-           factory.initialize(this);
+          factory.initialize(this);
            
            sFactoryInit = true;
        } else {
@@ -70,6 +70,7 @@ public class CordovaWebViewTestActivity extends Activity implements CordovaInter
         Config.init(this);
         
         cordovaWebView = (CordovaWebView) findViewById(R.id.cordovaWebView);
+        factory.initializeWebView(cordovaWebView, 0xFFFFFF, false, null);
         cordovaWebView.init(this, new CordovaWebViewClient(this, cordovaWebView), new CordovaChromeClient(this, cordovaWebView),
                 Config.getPluginEntries(), Config.getWhitelist(), Config.getPreferences());
 

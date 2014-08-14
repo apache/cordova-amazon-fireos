@@ -291,7 +291,9 @@ public class CordovaActivity extends Activity implements CordovaInterface {
      * require a more specialized web view.
      */
     protected CordovaWebView makeWebView() {
-        return new CordovaWebView(CordovaActivity.this);
+        CordovaWebView newWebView = new CordovaWebView(CordovaActivity.this);
+        this.getFactory().initializeWebView(newWebView, 0xFFFFFF, false, null);
+        return newWebView;
     }
 
     /**
@@ -318,7 +320,6 @@ public class CordovaActivity extends Activity implements CordovaInterface {
         return webView.makeWebChromeClient(this);
     }
 
-<<<<<<< HEAD
     /**
      * Construct the AmazonWebkitFactory
      * 
@@ -371,7 +372,7 @@ public class CordovaActivity extends Activity implements CordovaInterface {
             LOG.e(TAG, "WebKit factory initialization failed. Make sure you have android_interface.jar in libs folder.");
             displayError(ERROR_DIALOG_TITLE, ANDROID_WEBKIT_FACTORY_MISSING, ERROR_DIALOG_OK_BUTTON, true);
         } catch (Exception e) {
-            LOG.e(TAG, "WebKit factory initialization failed.");
+            LOG.e(TAG, "WebKit factory initialization failed. e - " + e.getMessage());
             displayError(ERROR_DIALOG_TITLE, ANDROID_WEBKIT_FACTORY_MISSING, ERROR_DIALOG_OK_BUTTON, true);
         }
         
@@ -380,14 +381,12 @@ public class CordovaActivity extends Activity implements CordovaInterface {
     /**
      * Create and initialize web container with default web view objects.
      */
-    @Deprecated // No need to call init() anymore.
-=======
->>>>>>> a14c794... Un-deprecate CordovaActivity.init() - it's needed to tweak prefs in onCreate
     public void init() {
     	if (factory != null) {
     		CordovaWebView webView = makeWebView();
     		this.init(webView, makeWebViewClient(webView), makeChromeClient(webView));
     	}
+    }
 
     @SuppressLint("NewApi")
     @Deprecated // Call init() instead and override makeWebView() to customize.
@@ -434,7 +433,6 @@ public class CordovaActivity extends Activity implements CordovaInterface {
      * Load the url into the webview.
      */
     public void loadUrl(String url) {
-<<<<<<< HEAD
         // Init web view if not already done
         if (this.appView == null) {
             this.init();
@@ -444,11 +442,9 @@ public class CordovaActivity extends Activity implements CordovaInterface {
             }
         }
 
-=======
         if (appView == null) {
             init();
         }
->>>>>>> a14c794... Un-deprecate CordovaActivity.init() - it's needed to tweak prefs in onCreate
         this.splashscreenTime = preferences.getInteger("SplashScreenDelay", this.splashscreenTime);
         String splash = preferences.getString("SplashScreen", null);
         if(this.splashscreenTime > 0 && splash != null)

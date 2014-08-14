@@ -39,7 +39,8 @@ import com.amazon.android.webkit.AmazonWebView;
 import com.amazon.android.webkit.AmazonGeolocationPermissions;
 import com.amazon.android.webkit.AmazonMediaDeviceSettings;
 
-
+import org.json.JSONObject;
+import org.json.JSONException;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
