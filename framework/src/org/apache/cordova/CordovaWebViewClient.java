@@ -235,7 +235,7 @@ public class CordovaWebViewClient extends AmazonWebViewClient {
         // If this is a "Protocol Not Supported" error, then revert to the previous
         // page. If there was no previous page, then punt. The application's config
         // is likely incorrect (start page set to sms: or something like that)
-        if (errorCode == WebViewClient.ERROR_UNSUPPORTED_SCHEME) {
+        if (errorCode == AmazonWebViewClient.ERROR_UNSUPPORTED_SCHEME) {
             if (view.canGoBack()) {
                 view.goBack();
                 return;
