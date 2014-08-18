@@ -300,7 +300,6 @@
             android:exported="false"
             android:permission="org.chromium.content_shell.permission.SANDBOX"
             android:process=":sandboxed_process5" />
-        </application>
         <activity
             android:windowSoftInputMode="adjustPan"
             android:label="@string/app_name" 

@@ -249,6 +249,7 @@ exports.createProject = function(project_path, package_name, project_name, proje
         setShellFatal(true, function() {
             // copy project template
             shell.cp('-r', path.join(project_template_dir, 'assets'), project_path);
+            shell.cp('-r', path.join(project_template_dir, 'res'), project_path);
             shell.cp('-r', path.join(ROOT, 'framework', 'res', 'xml'), path.join(project_path, 'res'));
 
             // Manually create directories that would be empty within the template (since git doesn't track directories).
@@ -261,7 +262,6 @@ exports.createProject = function(project_path, package_name, project_name, proje
             }
 
             // copy cordova.js, cordova.jar and res/xml
-            shell.cp('-r', path.join(ROOT, 'framework', 'res', 'xml'), path.join(project_path, 'res'));
             copyJsAndLibrary(project_path, use_shared_project, safe_activity_name);
 
             // interpolate the activity name and package
