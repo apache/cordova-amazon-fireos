@@ -110,7 +110,19 @@ public class ConfigXmlParser {
                     String origin = xml.getAttributeValue(null, "origin");
                     String subdomains = xml.getAttributeValue(null, "subdomains");
                     if (origin != null) {
-                        whitelist.addWhiteListEntry(origin, (subdomains != null) && (subdomains.compareToIgnoreCase("true") == 0));
+                        if (external) {
+                            externalWhitelist.addWhiteListEntry(origin, (subdomains != null) && (subdomains.compareToIgnoreCase("true") == 0));
+                        } else {
+                            if ("*".equals(origin)) {
+                                // Special-case * origin to mean http and https when used for internal
+                                // whitelist. This prevents external urls like sms: and geo: from being
+                                // handled internally.
+                                internalWhitelist.addWhiteListEntry("http://*/*", false);
+                                internalWhitelist.addWhiteListEntry("https://*/*", false);
+                            } else {
+                                internalWhitelist.addWhiteListEntry(origin, (subdomains != null) && (subdomains.compareToIgnoreCase("true") == 0));
+                            }
+                        }
                     }
                 }
                 else if (strNode.equals("preference")) {
