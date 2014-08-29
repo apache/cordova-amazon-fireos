@@ -1,6 +1,5 @@
-
 // Platform: amazon-fireos
-// 3.6.3
+// 3.7.0-dev-8f41e8d
 /*
  Licensed to the Apache Software Foundation (ASF) under one
  or more contributor license agreements.  See the NOTICE file
@@ -20,7 +19,7 @@
  under the License.
 */
 ;(function() {
-var CORDOVA_JS_BUILD_LABEL = '3.6.3';
+var CORDOVA_JS_BUILD_LABEL = '3.7.0-dev-8f41e8d';
 // file: src/scripts/require.js
 
 /*jshint -W079 */
@@ -1498,17 +1497,6 @@ module.exports = {
         cordova.addDocumentEventHandler('menubutton');
         cordova.addDocumentEventHandler('searchbutton');
 
-        function bindButtonChannel(buttonName) {
-            // generic button bind used for volumeup/volumedown buttons
-            var volumeButtonChannel = cordova.addDocumentEventHandler(buttonName + 'button');
-            volumeButtonChannel.onHasSubscribersChange = function() {
-                exec(null, null, "App", "overrideButton", [buttonName, this.numHandlers == 1]);
-            };
-        }
-        // Inject a listener for the volume buttons on the document.
-        bindButtonChannel('volumeup');
-        bindButtonChannel('volumedown');
-
         // Let native code know we are all done on the JS side.
         // Native code will then un-hide the WebView.
         channel.onCordovaReady.subscribe(function() {
@@ -1584,21 +1572,6 @@ module.exports = {
     */
     overrideBackbutton:function(override) {
         exec(null, null, "App", "overrideBackbutton", [override]);
-    },
-
-    /**
-    * Override the default behavior of the Android volume button.
-    * If overridden, when the volume button is pressed, the "volume[up|down]button"
-    * JavaScript event will be fired.
-    *
-    * Note: The user should not have to call this method.  Instead, when the user
-    *       registers for the "volume[up|down]button" event, this is automatically done.
-    *
-    * @param button          volumeup, volumedown
-    * @param override        T=override, F=cancel override
-    */
-    overrideButton:function(button, override) {
-        exec(null, null, "App", "overrideButton", [button, override]);
     },
 
     /**
