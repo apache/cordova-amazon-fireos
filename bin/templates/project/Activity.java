@@ -37,9 +37,6 @@ public class __ACTIVITY__ extends CordovaActivity
         if (this.appView != null) {
             // Set by <content src="index.html" /> in config.xml
             loadUrl(launchUrl);
-
         }
-       
-
     }
 }
