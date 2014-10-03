@@ -71,6 +71,9 @@ public class CordovaChromeClient extends AmazonWebChromeClient {
     // the video progress view
     private View mVideoProgressView;
     
+    //Keep track of last AlertDialog showed
+    private AlertDialog lastHandledDialog;
+    
     // File Chooser
     public AmazonValueCallback<Uri> mUploadMessage;
     
@@ -121,7 +124,7 @@ public class CordovaChromeClient extends AmazonWebChromeClient {
                         result.cancel();
                     }
                 });
-        dlg.show();
+        lastHandledDialog = dlg.show();
         return true;
     }
 
@@ -162,7 +165,7 @@ public class CordovaChromeClient extends AmazonWebChromeClient {
                         result.cancel();
                     }
                 });
-        dlg.show();
+        lastHandledDialog = dlg.show();
         return true;
     }
 
@@ -207,7 +210,7 @@ public class CordovaChromeClient extends AmazonWebChromeClient {
                             res.cancel();
                         }
                     });
-            dlg.show();
+            lastHandledDialog = dlg.show();
         }
         return true;
     }
@@ -374,4 +377,10 @@ public class CordovaChromeClient extends AmazonWebChromeClient {
         }
         return null;
     }
+    public void destroyLastDialog(){
+        if(lastHandledDialog != null){
+                lastHandledDialog.cancel();
+        }
+    }
+
 }
