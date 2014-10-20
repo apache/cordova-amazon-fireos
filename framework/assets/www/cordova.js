@@ -1,5 +1,5 @@
 // Platform: amazon-fireos
-// 3.7.0-dev-1258511
+// 94291706945c42fd47fa632ed30f5eb811080e95
 /*
  Licensed to the Apache Software Foundation (ASF) under one
  or more contributor license agreements.  See the NOTICE file
@@ -19,7 +19,7 @@
  under the License.
 */
 ;(function() {
-var CORDOVA_JS_BUILD_LABEL = '3.7.0-dev-1258511';
+var PLATFORM_VERSION_BUILD_LABEL = '3.6.0';
 // file: src/scripts/require.js
 
 /*jshint -W079 */
@@ -175,7 +175,8 @@ function createEvent(type, data) {
 var cordova = {
     define:define,
     require:require,
-    version:CORDOVA_JS_BUILD_LABEL,
+    version:PLATFORM_VERSION_BUILD_LABEL,
+    platformVersion:PLATFORM_VERSION_BUILD_LABEL,
     platformId:platform.id,
     /**
      * Methods to add/remove your own addEventListener hijacking on document + window.
@@ -1197,6 +1198,16 @@ function replaceNavigator(origNavigator) {
         for (var key in origNavigator) {
             if (typeof origNavigator[key] == 'function') {
                 newNavigator[key] = origNavigator[key].bind(origNavigator);
+            } else {
+                (function(k) {
+                        Object.defineProperty(newNavigator, k, {
+                            get: function() {
+                                return origNavigator[k];
+                            },
+                            configurable: true,
+                            enumerable: true
+                        });
+                    })(key);
             }
         }
     }
@@ -1316,6 +1327,16 @@ function replaceNavigator(origNavigator) {
         for (var key in origNavigator) {
             if (typeof origNavigator[key] == 'function') {
                 newNavigator[key] = origNavigator[key].bind(origNavigator);
+            } else {
+                (function(k) {
+                        Object.defineProperty(newNavigator, k, {
+                            get: function() {
+                                return origNavigator[k];
+                            },
+                            configurable: true,
+                            enumerable: true
+                        });
+                    })(key);
             }
         }
     }

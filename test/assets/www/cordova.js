@@ -1,6 +1,5 @@
-
 // Platform: amazon-fireos
-// 3.6.3
+// 94291706945c42fd47fa632ed30f5eb811080e95
 /*
  Licensed to the Apache Software Foundation (ASF) under one
  or more contributor license agreements.  See the NOTICE file
@@ -20,7 +19,7 @@
  under the License.
 */
 ;(function() {
-var CORDOVA_JS_BUILD_LABEL = '3.6.3';
+var PLATFORM_VERSION_BUILD_LABEL = '3.6.0';
 // file: src/scripts/require.js
 
 /*jshint -W079 */
@@ -176,7 +175,8 @@ function createEvent(type, data) {
 var cordova = {
     define:define,
     require:require,
-    version:CORDOVA_JS_BUILD_LABEL,
+    version:PLATFORM_VERSION_BUILD_LABEL,
+    platformVersion:PLATFORM_VERSION_BUILD_LABEL,
     platformId:platform.id,
     /**
      * Methods to add/remove your own addEventListener hijacking on document + window.
@@ -263,11 +263,7 @@ var cordova = {
      * Called by native code when returning successful result from an action.
      */
     callbackSuccess: function(callbackId, args) {
-        try {
-            cordova.callbackFromNative(callbackId, true, args.status, [args.message], args.keepCallback);
-        } catch (e) {
-            console.log("Error in success callback: " + callbackId + " = "+e);
-        }
+        cordova.callbackFromNative(callbackId, true, args.status, [args.message], args.keepCallback);
     },
 
     /**
@@ -276,29 +272,33 @@ var cordova = {
     callbackError: function(callbackId, args) {
         // TODO: Deprecate callbackSuccess and callbackError in favour of callbackFromNative.
         // Derive success from status.
-        try {
-            cordova.callbackFromNative(callbackId, false, args.status, [args.message], args.keepCallback);
-        } catch (e) {
-            console.log("Error in error callback: " + callbackId + " = "+e);
-        }
+        cordova.callbackFromNative(callbackId, false, args.status, [args.message], args.keepCallback);
     },
 
     /**
      * Called by native code when returning the result from an action.
      */
-    callbackFromNative: function(callbackId, success, status, args, keepCallback) {
-        var callback = cordova.callbacks[callbackId];
-        if (callback) {
-            if (success && status == cordova.callbackStatus.OK) {
-                callback.success && callback.success.apply(null, args);
-            } else if (!success) {
-                callback.fail && callback.fail.apply(null, args);
-            }
+    callbackFromNative: function(callbackId, isSuccess, status, args, keepCallback) {
+        try {
+            var callback = cordova.callbacks[callbackId];
+            if (callback) {
+                if (isSuccess && status == cordova.callbackStatus.OK) {
+                    callback.success && callback.success.apply(null, args);
+                } else {
+                    callback.fail && callback.fail.apply(null, args);
+                }
 
-            // Clear callback if not expecting any more results
-            if (!keepCallback) {
-                delete cordova.callbacks[callbackId];
+                // Clear callback if not expecting any more results
+                if (!keepCallback) {
+                    delete cordova.callbacks[callbackId];
+                }
             }
+        }
+        catch (err) {
+            var msg = "Error in " + (isSuccess ? "Success" : "Error") + " callbackId: " + callbackId + " : " + err;
+            console && console.log && console.log(msg);
+            cordova.fireWindowEvent("cordovacallbackerror", { 'message': msg });
+            throw err;
         }
     },
     addConstructor: function(func) {
@@ -1013,6 +1013,42 @@ androidExec.setNativeToJsBridgeMode = function(mode) {
     }
 };
 
+function buildPayload(payload, message) {
+    var payloadKind = message.charAt(0);
+    if (payloadKind == 's') {
+        payload.push(message.slice(1));
+    } else if (payloadKind == 't') {
+        payload.push(true);
+    } else if (payloadKind == 'f') {
+        payload.push(false);
+    } else if (payloadKind == 'N') {
+        payload.push(null);
+    } else if (payloadKind == 'n') {
+        payload.push(+message.slice(1));
+    } else if (payloadKind == 'A') {
+        var data = message.slice(1);
+        var bytes = window.atob(data);
+        var arraybuffer = new Uint8Array(bytes.length);
+        for (var i = 0; i < bytes.length; i++) {
+            arraybuffer[i] = bytes.charCodeAt(i);
+        }
+        payload.push(arraybuffer.buffer);
+    } else if (payloadKind == 'S') {
+        payload.push(window.atob(message.slice(1)));
+    } else if (payloadKind == 'M') {
+        var multipartMessages = message.slice(1);
+        while (multipartMessages !== "") {
+            var spaceIdx = multipartMessages.indexOf(' ');
+            var msgLen = +multipartMessages.slice(0, spaceIdx);
+            var multipartMessage = multipartMessages.substr(spaceIdx + 1, msgLen);
+            multipartMessages = multipartMessages.slice(spaceIdx + msgLen + 1);
+            buildPayload(payload, multipartMessage);
+        }
+    } else {
+        payload.push(JSON.parse(message));
+    }
+}
+
 // Processes a single message, as encoded by NativeToJsMessageQueue.java.
 function processMessage(message) {
     try {
@@ -1026,32 +1062,10 @@ function processMessage(message) {
             var status = +message.slice(2, spaceIdx);
             var nextSpaceIdx = message.indexOf(' ', spaceIdx + 1);
             var callbackId = message.slice(spaceIdx + 1, nextSpaceIdx);
-            var payloadKind = message.charAt(nextSpaceIdx + 1);
-            var payload;
-            if (payloadKind == 's') {
-                payload = message.slice(nextSpaceIdx + 2);
-            } else if (payloadKind == 't') {
-                payload = true;
-            } else if (payloadKind == 'f') {
-                payload = false;
-            } else if (payloadKind == 'N') {
-                payload = null;
-            } else if (payloadKind == 'n') {
-                payload = +message.slice(nextSpaceIdx + 2);
-            } else if (payloadKind == 'A') {
-                var data = message.slice(nextSpaceIdx + 2);
-                var bytes = window.atob(data);
-                var arraybuffer = new Uint8Array(bytes.length);
-                for (var i = 0; i < bytes.length; i++) {
-                    arraybuffer[i] = bytes.charCodeAt(i);
-                }
-                payload = arraybuffer.buffer;
-            } else if (payloadKind == 'S') {
-                payload = window.atob(message.slice(nextSpaceIdx + 2));
-            } else {
-                payload = JSON.parse(message.slice(nextSpaceIdx + 1));
-            }
-            cordova.callbackFromNative(callbackId, success, status, [payload], keepCallback);
+            var payloadMessage = message.slice(nextSpaceIdx + 1);
+            var payload = [];
+            buildPayload(payload, payloadMessage);
+            cordova.callbackFromNative(callbackId, success, status, payload, keepCallback);
         } else {
             console.log("processMessage failed: invalid message: " + JSON.stringify(message));
         }
@@ -1184,6 +1198,16 @@ function replaceNavigator(origNavigator) {
         for (var key in origNavigator) {
             if (typeof origNavigator[key] == 'function') {
                 newNavigator[key] = origNavigator[key].bind(origNavigator);
+            } else {
+                (function(k) {
+                        Object.defineProperty(newNavigator, k, {
+                            get: function() {
+                                return origNavigator[k];
+                            },
+                            configurable: true,
+                            enumerable: true
+                        });
+                    })(key);
             }
         }
     }
@@ -1303,6 +1327,16 @@ function replaceNavigator(origNavigator) {
         for (var key in origNavigator) {
             if (typeof origNavigator[key] == 'function') {
                 newNavigator[key] = origNavigator[key].bind(origNavigator);
+            } else {
+                (function(k) {
+                        Object.defineProperty(newNavigator, k, {
+                            get: function() {
+                                return origNavigator[k];
+                            },
+                            configurable: true,
+                            enumerable: true
+                        });
+                    })(key);
             }
         }
     }
@@ -1498,17 +1532,6 @@ module.exports = {
         cordova.addDocumentEventHandler('menubutton');
         cordova.addDocumentEventHandler('searchbutton');
 
-        function bindButtonChannel(buttonName) {
-            // generic button bind used for volumeup/volumedown buttons
-            var volumeButtonChannel = cordova.addDocumentEventHandler(buttonName + 'button');
-            volumeButtonChannel.onHasSubscribersChange = function() {
-                exec(null, null, "App", "overrideButton", [buttonName, this.numHandlers == 1]);
-            };
-        }
-        // Inject a listener for the volume buttons on the document.
-        bindButtonChannel('volumeup');
-        bindButtonChannel('volumedown');
-
         // Let native code know we are all done on the JS side.
         // Native code will then un-hide the WebView.
         channel.onCordovaReady.subscribe(function() {
@@ -1584,21 +1607,6 @@ module.exports = {
     */
     overrideBackbutton:function(override) {
         exec(null, null, "App", "overrideBackbutton", [override]);
-    },
-
-    /**
-    * Override the default behavior of the Android volume button.
-    * If overridden, when the volume button is pressed, the "volume[up|down]button"
-    * JavaScript event will be fired.
-    *
-    * Note: The user should not have to call this method.  Instead, when the user
-    *       registers for the "volume[up|down]button" event, this is automatically done.
-    *
-    * @param button          volumeup, volumedown
-    * @param override        T=override, F=cancel override
-    */
-    overrideButton:function(button, override) {
-        exec(null, null, "App", "overrideButton", [button, override]);
     },
 
     /**
