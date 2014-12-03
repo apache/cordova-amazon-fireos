@@ -279,9 +279,12 @@ public class CordovaWebView extends AmazonWebView {
         
         // Jellybean rightfully tried to lock this down. Too bad they didn't give us a whitelist
         // while we do this
-        if (android.os.Build.VERSION.SDK_INT > android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN
             || (getWebViewBackend(this.cordova.getFactory()) == WebViewBackend.CHROMIUM))
             Level16Apis.enableUniversalAccess(settings);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            Level17Apis.setMediaPlaybackRequiresUserGesture(settings, false);
+        }
         String databasePath = getContext().getApplicationContext().getDir("database", Context.MODE_PRIVATE).getPath();
         
         if (getWebViewBackend(this.cordova.getFactory()) == WebViewBackend.ANDROID) {
@@ -294,7 +297,7 @@ public class CordovaWebView extends AmazonWebView {
                 // shouldn't get here...
                 Log.e(TAG, "Unable to construct application cache directory, feature disabled");
             }
-        // Enable database
+	// Enable database
         // We keep this disabled because we use or shim to get around DOM_EXCEPTION_ERROR_16
         settings.setDatabaseEnabled(true);
         settings.setDatabasePath(databasePath);
@@ -965,7 +968,14 @@ public class CordovaWebView extends AmazonWebView {
             settings.setAllowUniversalAccessFromFileURLs(true);
         }
     }
-    
+
+    @TargetApi(17)
+    private static final class Level17Apis {
+        static void setMediaPlaybackRequiresUserGesture(AmazonWebSettings settings, boolean value) {
+            settings.setMediaPlaybackRequiresUserGesture(value);
+        }
+    }
+
     public void printBackForwardList() {
         AmazonWebBackForwardList currentList = this.copyBackForwardList();
         int currentSize = currentList.getSize();
