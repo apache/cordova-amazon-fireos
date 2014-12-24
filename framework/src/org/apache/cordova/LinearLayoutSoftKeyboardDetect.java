@@ -18,10 +18,7 @@
 */
 package org.apache.cordova;
 
-import org.apache.cordova.LOG;
-
 import android.content.Context;
-//import android.view.View.MeasureSpec;
 import android.widget.LinearLayout;
 
 /**
@@ -70,6 +67,7 @@ public class LinearLayoutSoftKeyboardDetect extends LinearLayout {
     private int screenWidth = 0;
     private int screenHeight = 0;
     private CordovaActivity app = null;
+    private App appPlugin = null;
 
     public LinearLayoutSoftKeyboardDetect(Context context, int width, int height) {
         super(context);
@@ -84,7 +82,7 @@ public class LinearLayoutSoftKeyboardDetect extends LinearLayout {
      * gets smaller fire a show keyboard event and when height gets bigger fire
      * a hide keyboard event.
      *
-     * Note: We are using app.postMessage so that this is more compatible with the API
+     * Note: We are using the core App plugin to send events over the bridge to Javascript
      *
      * @param widthMeasureSpec
      * @param heightMeasureSpec
@@ -116,22 +114,21 @@ public class LinearLayoutSoftKeyboardDetect extends LinearLayout {
             screenHeight = screenWidth;
             screenWidth = tmp_var;
             LOG.v(TAG, "Orientation Change");
-            
         }
         // If the height has gotten bigger then we will assume the soft keyboard has
         // gone away.
         else if (height > oldHeight) {
-            if (app != null && hasKeyboardEventOccurred(height) ) {   
+            if (hasKeyboardEventOccurred(height) ) {   
                 LOG.v(TAG, "Fired Hide Keyboard Event") ;
-                app.appView.sendJavascript("cordova.fireDocumentEvent('hidekeyboard');");
+                sendEvent("hidekeyboard");
             }
         }
         // If the height has gotten smaller then we will assume the soft keyboard has 
         // been displayed.
         else if (height < oldHeight) {
-            if (app != null && hasKeyboardEventOccurred(height)  ) {  
+            if (hasKeyboardEventOccurred(height)  ) {  
                 LOG.v(TAG, "Fired Show Keyboard Event") ;
-                app.appView.sendJavascript("cordova.fireDocumentEvent('showkeyboard');");
+                sendEvent("hidekeyboard");
             }
         }
 
@@ -164,5 +161,17 @@ public class LinearLayoutSoftKeyboardDetect extends LinearLayout {
         //Calculate percentage change in container height as a percentage of screen height
         double percentageChange = (double) (Math.abs(oldHeight - height) * 100) / screenHeight; 
         return percentageChange > PERCENTAGE_CHANGE_THRESHOLD; 
+    }
+
+    private void sendEvent(String event) {
+        if (appPlugin == null) {
+            appPlugin = (App)app.appView.pluginManager.getPlugin(App.PLUGIN_NAME);
+        }
+
+        if (appPlugin == null) {
+            LOG.w(TAG, "Unable to fire event without existing plugin");
+            return;
+        }
+        appPlugin.fireJavascriptEvent(event);
     }
 }
