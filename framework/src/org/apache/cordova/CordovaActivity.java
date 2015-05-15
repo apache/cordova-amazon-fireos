@@ -249,7 +249,6 @@ public class CordovaActivity extends Activity implements CordovaInterface {
         parser.parse(this);
         preferences = parser.getPreferences();
         preferences.setPreferencesBundle(getIntent().getExtras());
-        preferences.copyIntoIntentExtras(this);
         internalWhitelist = parser.getInternalWhitelist();
         externalWhitelist = parser.getExternalWhitelist();
         launchUrl = parser.getLaunchUrl();
