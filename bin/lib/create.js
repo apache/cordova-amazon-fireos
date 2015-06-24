@@ -53,6 +53,7 @@ function getFrameworkDir(projectPath, shared) {
 function copyJsAndLibrary(projectPath, shared, projectName) {
     var nestedCordovaLibPath = getFrameworkDir(projectPath, false);
     shell.cp('-f', path.join(ROOT, 'framework', 'assets', 'www', 'cordova.js'), path.join(projectPath, 'assets', 'www', 'cordova.js'));
+    shell.cp('-rf', path.join(ROOT, 'cordova-js-src'), path.join(projectPath, 'platform_www'));
     // Don't fail if there are no old jars.
     setShellFatal(false, function() {
         shell.ls(path.join(projectPath, 'libs', 'cordova-*.jar')).forEach(function(oldJar) {
