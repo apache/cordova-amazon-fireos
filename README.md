@@ -7,9 +7,9 @@
 # to you under the Apache License, Version 2.0 (the
 # "License"); you may not use this file except in compliance
 # with the License.  You may obtain a copy of the License at
-# 
+#
 # http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing,
 # software distributed under the License is distributed on an
 # "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,9 +22,18 @@ Cordova Amazon Fire OS
 ===
 
 Cordova Amazon Fire OS is an application library that allows for Cordova-based
-projects to be built for the Amazon Fire OS Platform. It uses Amazon's web app runtime that is built on open-source Chromium project. With the web app runtime, your web apps can achieve fluidity and speed approaching that of native apps. 
+projects to be built for the Amazon Fire OS Platform version 4.0 and earlier. It uses Amazon's web app runtime that is built on open-source Chromium project. With the web app runtime, your web apps can achieve fluidity and speed approaching that of native apps.
 
 [Apache Cordova](http://cordova.io) is a project at The Apache Software Foundation (ASF).
+
+***
+
+DEPRECATION NOTICE
+---
+
+***Cordova Amazon Fire OS platform support is deprecated for Amazon Fire OS 5.0 and higher (2015 devices and later); for these devices, please use the Android platform target only.***
+
+***
 
 
 Requires
@@ -34,11 +43,11 @@ Requires
 - Apache ANT 1.8.0 or greater
 - Android SDK [http://developer.android.com](http://developer.android.com)
 - Amazon WebView SDK [https://developer.amazon.com/sdk/fire/IntegratingAWV.html#installawv](https://developer.amazon.com/sdk/fire/IntegratingAWV.html#installawv)
- 
+
 Cordova Amazon Fire OS Developer Tools
 ---
 
-The Cordova developer tooling is split between general tooling and project level tooling. 
+The Cordova developer tooling is split between general tooling and project level tooling.
 
 General Commands
 
@@ -53,7 +62,7 @@ These commands live in a generated Cordova Amazon Fire OS project. Emulator supp
     ./cordova/clean ........................ cleans the project
     ./cordova/build ........................ calls `clean` then compiles the project
     ./cordova/log   ........................ stream device logs to stdout
-    ./cordova/run   ........................ calls `build` then deploys to a connected Amazon device. 
+    ./cordova/run   ........................ calls `build` then deploys to a connected Amazon device.
     ./cordova/version ...................... returns the cordova-amazon-fireos version of the current project
 
 Importing a Cordova Amazon Fire OS Project into Eclipse
@@ -69,7 +78,7 @@ Importing a Cordova Amazon Fire OS Project into Eclipse
 
 Building without the Tooling
 ---
-Note: The Developer Tools handle this.  This is only to be done if the tooling fails, or if 
+Note: The Developer Tools handle this.  This is only to be done if the tooling fails, or if
 you are developing directly against the framework.
 
 

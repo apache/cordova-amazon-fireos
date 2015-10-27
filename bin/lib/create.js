@@ -240,6 +240,11 @@ exports.createProject = function(project_path, package_name, project_name, proje
     var lib_path = path.join(global_config_path, 'lib');
     var awv_sdk_expected_path=path.join(lib_path, 'commonlibs');
     var awv_interface_jar_commonlib_path = path.join(awv_sdk_expected_path, awv_interface);
+    
+    // message that we are now moving to stock webview for new versions of the OS
+    var deprecation_notice = "*********************************\n\nDEPRECATION NOTICE:\n\nThe AWV SDK is deprecated for Amazon Fire OS 5.0 and higher (2015 devices and later); for these devices, please use the Android platform target only.\n\n*********************************"; 
+    console.log(deprecation_notice);
+
     console.log('Checking if awv sdk is installed at : ' + awv_sdk_expected_path);
     if (!fs.existsSync(awv_sdk_expected_path) || !fs.existsSync(awv_interface_jar_commonlib_path)) {
         shell.mkdir('-p',awv_sdk_expected_path);
