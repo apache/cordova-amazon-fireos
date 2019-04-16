@@ -21,6 +21,16 @@
 Cordova Amazon Fire OS
 ===
 
+---
+📌 **Deprecation Notice**
+
+This repository is deprecated and no more work will be done on this by Apache Cordova. You can continue to use this and it should work as-is but any future issues will not be fixed by the Cordova community.
+
+Feel free to fork this repository and improve your fork. Existing forks are listed in [Network](../../network) and [Forks](../../network/members).
+
+- Learn more: https://github.com/apache/cordova/blob/master/deprecated.md#deprecated-platforms
+---
+
 Cordova Amazon Fire OS is an application library that allows for Cordova-based
 projects to be built for the Amazon Fire OS Platform. It uses Amazon's web app runtime that is built on open-source Chromium project. With the web app runtime, your web apps can achieve fluidity and speed approaching that of native apps. 
 
